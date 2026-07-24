@@ -5,9 +5,10 @@ import TransactionsSection from './components/TransactionsSection';
 import GoalsSection from './components/GoalsSection';
 import MembersSection from './components/MembersSection';
 import Reports from './components/Reports';
-import { LayoutDashboard, Receipt, PiggyBank, Users, BarChart3, Wallet } from 'lucide-react';
+import SettingsSection from './components/SettingsSection';
+import { LayoutDashboard, Receipt, PiggyBank, Users, BarChart3, Wallet, Settings } from 'lucide-react';
 
-type Tab = 'dashboard' | 'transactions' | 'goals' | 'members' | 'reports';
+type Tab = 'dashboard' | 'transactions' | 'goals' | 'members' | 'reports' | 'settings';
 
 const TABS: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'dashboard', label: 'סקירה', icon: LayoutDashboard },
@@ -15,6 +16,7 @@ const TABS: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'goals', label: 'יעדי חיסכון', icon: PiggyBank },
   { id: 'reports', label: 'דוחות', icon: BarChart3 },
   { id: 'members', label: 'בני משפחה', icon: Users },
+  { id: 'settings', label: 'סנכרון', icon: Settings },
 ];
 
 function AppShell() {
@@ -51,6 +53,7 @@ function AppShell() {
         {tab === 'goals' && <GoalsSection />}
         {tab === 'reports' && <Reports />}
         {tab === 'members' && <MembersSection />}
+        {tab === 'settings' && <SettingsSection />}
       </main>
     </div>
   );
