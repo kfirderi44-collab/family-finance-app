@@ -14,6 +14,7 @@ import {
   saveSyncConfig,
   subscribeToFamily,
   pushFamilyData,
+  seedOrAdoptFamilyData,
   type SyncConfig,
 } from './sync';
 
@@ -86,19 +87,32 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     }
     setSyncStatus('connecting');
     setSyncError(null);
+    let seeding = false;
     const unsubscribe = subscribeToFamily(
       syncConfig,
       (remoteData) => {
         if (remoteData) {
           skipNextPush.current = true;
           setData(remoteData);
-        } else {
-          pushFamilyData(syncConfig, dataRef.current).catch((err) => {
-            setSyncStatus('error');
-            setSyncError(err instanceof Error ? err.message : String(err));
-          });
+          setSyncStatus('connected');
+        } else if (!seeding) {
+          // Doc doesn't exist yet: atomically create it (or adopt another
+          // device's data if it won the race to create it first).
+          seeding = true;
+          seedOrAdoptFamilyData(syncConfig, dataRef.current)
+            .then((resolved) => {
+              skipNextPush.current = true;
+              setData(resolved);
+              setSyncStatus('connected');
+            })
+            .catch((err) => {
+              setSyncStatus('error');
+              setSyncError(err instanceof Error ? err.message : String(err));
+            })
+            .finally(() => {
+              seeding = false;
+            });
         }
-        setSyncStatus('connected');
       },
       (message) => {
         setSyncStatus('error');

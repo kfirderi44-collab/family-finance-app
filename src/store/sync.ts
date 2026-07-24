@@ -1,5 +1,12 @@
 import { initializeApp, getApps, deleteApp, type FirebaseApp } from 'firebase/app';
-import { getFirestore, doc, onSnapshot, setDoc, type Firestore } from 'firebase/firestore';
+import {
+  getFirestore,
+  doc,
+  onSnapshot,
+  setDoc,
+  runTransaction,
+  type Firestore,
+} from 'firebase/firestore';
 import type { AppData } from '../types';
 
 const SYNC_KEY = 'family-finance-sync-config';
@@ -92,4 +99,27 @@ export async function pushFamilyData(config: SyncConfig, data: AppData): Promise
   const db = getFirestoreFor(config.firebaseConfig);
   const ref = doc(db, 'families', config.familyCode);
   await setDoc(ref, data);
+}
+
+/**
+ * Atomically creates the family doc with `localData` if it doesn't exist yet,
+ * or returns whatever is already there. Prevents two devices connecting to a
+ * brand-new family code at nearly the same moment from racing to seed the
+ * doc and clobbering each other's data.
+ */
+export async function seedOrAdoptFamilyData(
+  config: SyncConfig,
+  localData: AppData
+): Promise<AppData> {
+  const db = getFirestoreFor(config.firebaseConfig);
+  const ref = doc(db, 'families', config.familyCode);
+  return runTransaction(db, async (tx) => {
+    const snap = await tx.get(ref);
+    const existing = snap.data();
+    if (existing && Array.isArray(existing.members)) {
+      return existing as unknown as AppData;
+    }
+    tx.set(ref, localData);
+    return localData;
+  });
 }
