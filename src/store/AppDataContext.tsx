@@ -16,11 +16,23 @@ import {
   pushFamilyData,
   seedOrAdoptFamilyData,
   type SyncConfig,
+  type RemoteFamilyData,
 } from './sync';
 
 const STORAGE_KEY = 'family-finance-app-data';
+const TIMESTAMP_KEY = 'family-finance-data-timestamp';
 
 const MEMBER_COLORS = ['#4f46e5', '#059669', '#d97706', '#dc2626', '#0891b2', '#9333ea'];
+
+function loadDataTimestamp(): number {
+  const raw = localStorage.getItem(TIMESTAMP_KEY);
+  const parsed = raw ? Number(raw) : 0;
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function saveDataTimestamp(ts: number) {
+  localStorage.setItem(TIMESTAMP_KEY, String(ts));
+}
 
 function defaultData(): AppData {
   return {
@@ -75,6 +87,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
   const skipNextPush = useRef(false);
   const dataRef = useRef(data);
   dataRef.current = data;
+  // Timestamp confirming how fresh our local copy is — either the time of
+  // our last local edit, or the updatedAt of the last remote snapshot we
+  // adopted. Persisted so it survives a reload: without that, refreshing
+  // right after an edit (before the push lands) would forget the edit ever
+  // happened and let a stale server snapshot silently overwrite it.
+  const lastLocalChangeAt = useRef(loadDataTimestamp());
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -88,23 +106,39 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     setSyncStatus('connecting');
     setSyncError(null);
     let seeding = false;
+
+    const acceptOrHeal = (remote: RemoteFamilyData) => {
+      if (remote.updatedAt < lastLocalChangeAt.current) {
+        // The server copy is older than a local change (e.g. an earlier
+        // push failed or hadn't landed yet) — re-push local data instead
+        // of letting the stale snapshot overwrite it.
+        const ts = Date.now();
+        lastLocalChangeAt.current = ts;
+        saveDataTimestamp(ts);
+        pushFamilyData(syncConfig, dataRef.current).catch((err) => {
+          setSyncStatus('error');
+          setSyncError(err instanceof Error ? err.message : String(err));
+        });
+      } else {
+        lastLocalChangeAt.current = remote.updatedAt;
+        saveDataTimestamp(remote.updatedAt);
+        skipNextPush.current = true;
+        setData(remote.data);
+      }
+      setSyncStatus('connected');
+    };
+
     const unsubscribe = subscribeToFamily(
       syncConfig,
-      (remoteData) => {
-        if (remoteData) {
-          skipNextPush.current = true;
-          setData(remoteData);
-          setSyncStatus('connected');
+      (remote) => {
+        if (remote) {
+          acceptOrHeal(remote);
         } else if (!seeding) {
           // Doc doesn't exist yet: atomically create it (or adopt another
           // device's data if it won the race to create it first).
           seeding = true;
           seedOrAdoptFamilyData(syncConfig, dataRef.current)
-            .then((resolved) => {
-              skipNextPush.current = true;
-              setData(resolved);
-              setSyncStatus('connected');
-            })
+            .then(acceptOrHeal)
             .catch((err) => {
               setSyncStatus('error');
               setSyncError(err instanceof Error ? err.message : String(err));
@@ -129,6 +163,9 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       skipNextPush.current = false;
       return;
     }
+    const ts = Date.now();
+    lastLocalChangeAt.current = ts;
+    saveDataTimestamp(ts);
     pushFamilyData(syncConfig, data).catch((err) => {
       setSyncStatus('error');
       setSyncError(err instanceof Error ? err.message : String(err));

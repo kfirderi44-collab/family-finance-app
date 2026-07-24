@@ -69,9 +69,14 @@ function getFirestoreFor(config: FirebaseWebConfig): Firestore {
   return getFirestore(cachedApp);
 }
 
+export interface RemoteFamilyData {
+  data: AppData;
+  updatedAt: number;
+}
+
 export function subscribeToFamily(
   config: SyncConfig,
-  onData: (data: AppData | null) => void,
+  onData: (remote: RemoteFamilyData | null) => void,
   onError: (message: string) => void
 ): () => void {
   try {
@@ -80,9 +85,10 @@ export function subscribeToFamily(
     return onSnapshot(
       ref,
       (snap) => {
-        const data = snap.data();
-        if (data && Array.isArray(data.members)) {
-          onData(data as unknown as AppData);
+        const raw = snap.data();
+        if (raw && Array.isArray(raw.members)) {
+          const { updatedAt, ...data } = raw as AppData & { updatedAt?: number };
+          onData({ data: data as AppData, updatedAt: updatedAt ?? 0 });
         } else {
           onData(null);
         }
@@ -95,10 +101,12 @@ export function subscribeToFamily(
   }
 }
 
-export async function pushFamilyData(config: SyncConfig, data: AppData): Promise<void> {
+export async function pushFamilyData(config: SyncConfig, data: AppData): Promise<number> {
   const db = getFirestoreFor(config.firebaseConfig);
   const ref = doc(db, 'families', config.familyCode);
-  await setDoc(ref, data);
+  const updatedAt = Date.now();
+  await setDoc(ref, { ...data, updatedAt });
+  return updatedAt;
 }
 
 /**
@@ -110,16 +118,18 @@ export async function pushFamilyData(config: SyncConfig, data: AppData): Promise
 export async function seedOrAdoptFamilyData(
   config: SyncConfig,
   localData: AppData
-): Promise<AppData> {
+): Promise<RemoteFamilyData> {
   const db = getFirestoreFor(config.firebaseConfig);
   const ref = doc(db, 'families', config.familyCode);
   return runTransaction(db, async (tx) => {
     const snap = await tx.get(ref);
-    const existing = snap.data();
+    const existing = snap.data() as (AppData & { updatedAt?: number }) | undefined;
     if (existing && Array.isArray(existing.members)) {
-      return existing as unknown as AppData;
+      const { updatedAt, ...data } = existing;
+      return { data: data as AppData, updatedAt: updatedAt ?? 0 };
     }
-    tx.set(ref, localData);
-    return localData;
+    const updatedAt = Date.now();
+    tx.set(ref, { ...localData, updatedAt });
+    return { data: localData, updatedAt };
   });
 }
