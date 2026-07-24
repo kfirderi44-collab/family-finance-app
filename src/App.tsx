@@ -25,7 +25,7 @@ function AppShell() {
       <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-2">
           <Wallet className="text-indigo-600 dark:text-indigo-400" size={28} />
-          <h1 className="text-lg font-bold">תכנון פיננסי משפחתי</h1>
+          <h1 className="text-lg font-bold">תכנון פיננסי משפחת דראי</h1>
         </div>
         <nav className="max-w-5xl mx-auto px-2 flex gap-1 overflow-x-auto">
           {TABS.map(({ id, label, icon: Icon }) => (
