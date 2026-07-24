@@ -34,6 +34,7 @@ export interface AppData {
   members: Member[];
   transactions: Transaction[];
   goals: Goal[];
+  budgets: Record<string, number>;
 }
 
 export const EXPENSE_CATEGORIES = [

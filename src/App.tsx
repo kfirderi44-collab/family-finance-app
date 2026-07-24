@@ -6,13 +6,15 @@ import GoalsSection from './components/GoalsSection';
 import MembersSection from './components/MembersSection';
 import Reports from './components/Reports';
 import SettingsSection from './components/SettingsSection';
-import { LayoutDashboard, Receipt, PiggyBank, Users, BarChart3, Wallet, Settings } from 'lucide-react';
+import BudgetsSection from './components/BudgetsSection';
+import { LayoutDashboard, Receipt, PiggyBank, Users, BarChart3, Wallet, Settings, Target } from 'lucide-react';
 
-type Tab = 'dashboard' | 'transactions' | 'goals' | 'members' | 'reports' | 'settings';
+type Tab = 'dashboard' | 'transactions' | 'goals' | 'budgets' | 'members' | 'reports' | 'settings';
 
 const TABS: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: 'dashboard', label: 'סקירה', icon: LayoutDashboard },
   { id: 'transactions', label: 'הכנסות והוצאות', icon: Receipt },
+  { id: 'budgets', label: 'תקציבים', icon: Target },
   { id: 'goals', label: 'יעדי חיסכון', icon: PiggyBank },
   { id: 'reports', label: 'דוחות', icon: BarChart3 },
   { id: 'members', label: 'בני משפחה', icon: Users },
@@ -51,6 +53,7 @@ function AppShell() {
         {tab === 'dashboard' && <Dashboard onNavigate={setTab} />}
         {tab === 'transactions' && <TransactionsSection />}
         {tab === 'goals' && <GoalsSection />}
+        {tab === 'budgets' && <BudgetsSection />}
         {tab === 'reports' && <Reports />}
         {tab === 'members' && <MembersSection />}
         {tab === 'settings' && <SettingsSection />}

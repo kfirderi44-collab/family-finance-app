@@ -3,7 +3,7 @@ import { useAppData } from '../store/AppDataContext';
 import { formatCurrency, monthKey } from '../utils/format';
 import { ArrowDownCircle, ArrowUpCircle, Wallet, PiggyBank } from 'lucide-react';
 
-type Tab = 'dashboard' | 'transactions' | 'goals' | 'members' | 'reports';
+type Tab = 'dashboard' | 'transactions' | 'goals' | 'budgets' | 'members' | 'reports';
 
 interface Props {
   onNavigate: (tab: Tab) => void;
@@ -56,6 +56,18 @@ export default function Dashboard({ onNavigate }: Props) {
     [data.members]
   );
 
+  const budgetRows = useMemo(() => {
+    const currentMonth = monthKey(new Date().toISOString());
+    const spentByCategory: Record<string, number> = {};
+    for (const t of data.transactions) {
+      if (t.type !== 'expense' || monthKey(t.date) !== currentMonth) continue;
+      spentByCategory[t.category] = (spentByCategory[t.category] ?? 0) + t.amount;
+    }
+    return Object.entries(data.budgets)
+      .map(([category, limit]) => ({ category, limit, spent: spentByCategory[category] ?? 0 }))
+      .sort((a, b) => b.spent / b.limit - a.spent / a.limit);
+  }, [data.transactions, data.budgets]);
+
   return (
     <div className="space-y-6">
       <div>
@@ -92,7 +104,7 @@ export default function Dashboard({ onNavigate }: Props) {
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-sm">תנועות אחרונות</h3>
@@ -152,6 +164,44 @@ export default function Dashboard({ onNavigate }: Props) {
                     </div>
                     <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
                       <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${pct}%` }} />
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </div>
+
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-sm">תקציבים</h3>
+            <button
+              onClick={() => onNavigate('budgets')}
+              className="text-xs text-indigo-600 hover:underline"
+            >
+              לכל התקציבים
+            </button>
+          </div>
+          {budgetRows.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-6">עדיין לא הוגדרו תקציבים.</p>
+          ) : (
+            <ul className="space-y-3">
+              {budgetRows.slice(0, 4).map(({ category, limit, spent }) => {
+                const pct = Math.min(100, Math.round((spent / limit) * 100));
+                const over = spent > limit;
+                return (
+                  <li key={category}>
+                    <div className="flex justify-between text-xs mb-1">
+                      <span className="font-medium">{category}</span>
+                      <span className={over ? 'text-red-500 font-semibold' : 'text-slate-400'}>
+                        {pct}%
+                      </span>
+                    </div>
+                    <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${over ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-indigo-600'}`}
+                        style={{ width: `${pct}%` }}
+                      />
                     </div>
                   </li>
                 );

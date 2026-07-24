@@ -39,6 +39,17 @@ function defaultData(): AppData {
     members: [{ id: uuid(), name: 'המשפחה', color: MEMBER_COLORS[0] }],
     transactions: [],
     goals: [],
+    budgets: {},
+  };
+}
+
+// Fills in fields missing from data saved (locally or remotely) before they existed.
+function normalizeData(d: Partial<AppData>): AppData {
+  return {
+    members: d.members ?? [],
+    transactions: d.transactions ?? [],
+    goals: d.goals ?? [],
+    budgets: d.budgets ?? {},
   };
 }
 
@@ -48,7 +59,7 @@ function loadData(): AppData {
     if (!raw) return defaultData();
     const parsed = JSON.parse(raw) as AppData;
     if (!parsed.members || !parsed.transactions || !parsed.goals) return defaultData();
-    return parsed;
+    return normalizeData(parsed);
   } catch {
     return defaultData();
   }
@@ -69,6 +80,8 @@ interface AppDataContextValue {
   removeGoal: (id: string) => void;
   addContribution: (goalId: string, contribution: Omit<Contribution, 'id'>) => void;
   removeContribution: (goalId: string, contributionId: string) => void;
+  setBudget: (category: string, limit: number) => void;
+  removeBudget: (category: string) => void;
   nextMemberColor: () => string;
   syncConfig: SyncConfig | null;
   syncStatus: SyncStatus;
@@ -123,7 +136,7 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         lastLocalChangeAt.current = remote.updatedAt;
         saveDataTimestamp(remote.updatedAt);
         skipNextPush.current = true;
-        setData(remote.data);
+        setData(normalizeData(remote.data));
       }
       setSyncStatus('connected');
     };
@@ -234,6 +247,16 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
             : g
         ),
       }));
+    },
+    setBudget: (category, limit) => {
+      setData((d) => ({ ...d, budgets: { ...d.budgets, [category]: limit } }));
+    },
+    removeBudget: (category) => {
+      setData((d) => {
+        const budgets = { ...d.budgets };
+        delete budgets[category];
+        return { ...d, budgets };
+      });
     },
     nextMemberColor: () => MEMBER_COLORS[data.members.length % MEMBER_COLORS.length],
     syncConfig,
