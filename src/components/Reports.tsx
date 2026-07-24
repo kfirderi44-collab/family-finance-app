@@ -67,6 +67,26 @@ export default function Reports() {
       }));
   }, [data.transactions]);
 
+  const monthlySummary = useMemo(() => {
+    const map = new Map<string, { income: number; expense: number }>();
+    for (const t of data.transactions) {
+      const key = monthKey(t.date);
+      const entry = map.get(key) ?? { income: 0, expense: 0 };
+      if (t.type === 'income') entry.income += t.amount;
+      else entry.expense += t.amount;
+      map.set(key, entry);
+    }
+    return [...map.entries()]
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .map(([key, v]) => ({
+        key,
+        label: formatMonthLabel(key),
+        income: v.income,
+        expense: v.expense,
+        net: v.income - v.expense,
+      }));
+  }, [data.transactions]);
+
   const hasData = data.transactions.length > 0;
 
   return (
@@ -95,6 +115,39 @@ export default function Reports() {
                 <Line type="monotone" dataKey="הוצאות" stroke="#dc2626" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
+          </div>
+
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+            <h3 className="font-semibold text-sm mb-3">סיכום חודשי</h3>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="text-xs text-slate-400 border-b border-slate-100 dark:border-slate-700">
+                    <th className="text-start font-medium py-2">חודש</th>
+                    <th className="text-start font-medium py-2">הכנסות</th>
+                    <th className="text-start font-medium py-2">הוצאות</th>
+                    <th className="text-start font-medium py-2">יתרה</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {monthlySummary.map((m) => (
+                    <tr
+                      key={m.key}
+                      className="border-b border-slate-50 dark:border-slate-700/50 last:border-0"
+                    >
+                      <td className="py-2 font-medium">{m.label}</td>
+                      <td className="py-2 text-emerald-600">{formatCurrency(m.income)}</td>
+                      <td className="py-2 text-red-500">{formatCurrency(m.expense)}</td>
+                      <td
+                        className={`py-2 font-semibold ${m.net >= 0 ? 'text-emerald-600' : 'text-red-500'}`}
+                      >
+                        {formatCurrency(m.net)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
