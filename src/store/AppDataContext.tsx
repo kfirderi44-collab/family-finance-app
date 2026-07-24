@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { v4 as uuid } from 'uuid';
-import type { AppData, Contribution, Goal, Member, Transaction } from '../types';
+import { DEFAULT_EXPENSE_CATEGORIES, type AppData, type Contribution, type Goal, type Member, type Transaction } from '../types';
 import {
   loadSyncConfig,
   saveSyncConfig,
@@ -40,6 +40,7 @@ function defaultData(): AppData {
     transactions: [],
     goals: [],
     budgets: {},
+    expenseCategories: [...DEFAULT_EXPENSE_CATEGORIES],
   };
 }
 
@@ -50,6 +51,7 @@ function normalizeData(d: Partial<AppData>): AppData {
     transactions: d.transactions ?? [],
     goals: d.goals ?? [],
     budgets: d.budgets ?? {},
+    expenseCategories: d.expenseCategories ?? [...DEFAULT_EXPENSE_CATEGORIES],
   };
 }
 
@@ -82,6 +84,8 @@ interface AppDataContextValue {
   removeContribution: (goalId: string, contributionId: string) => void;
   setBudget: (category: string, limit: number) => void;
   removeBudget: (category: string) => void;
+  addExpenseCategory: (name: string) => void;
+  removeExpenseCategory: (name: string) => void;
   nextMemberColor: () => string;
   syncConfig: SyncConfig | null;
   syncStatus: SyncStatus;
@@ -256,6 +260,26 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         const budgets = { ...d.budgets };
         delete budgets[category];
         return { ...d, budgets };
+      });
+    },
+    addExpenseCategory: (name) => {
+      const trimmed = name.trim();
+      if (!trimmed) return;
+      setData((d) =>
+        d.expenseCategories.includes(trimmed)
+          ? d
+          : { ...d, expenseCategories: [...d.expenseCategories, trimmed] }
+      );
+    },
+    removeExpenseCategory: (name) => {
+      setData((d) => {
+        const budgets = { ...d.budgets };
+        delete budgets[name];
+        return {
+          ...d,
+          expenseCategories: d.expenseCategories.filter((c) => c !== name),
+          budgets,
+        };
       });
     },
     nextMemberColor: () => MEMBER_COLORS[data.members.length % MEMBER_COLORS.length],

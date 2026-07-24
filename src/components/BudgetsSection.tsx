@@ -1,12 +1,19 @@
 import { useMemo, useState } from 'react';
 import { useAppData } from '../store/AppDataContext';
-import { EXPENSE_CATEGORIES } from '../types';
 import { formatCurrency, monthKey } from '../utils/format';
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle, X, Trash2, Plus } from 'lucide-react';
 
 export default function BudgetsSection() {
-  const { data, setBudget, removeBudget } = useAppData();
+  const { data, setBudget, removeBudget, addExpenseCategory, removeExpenseCategory } = useAppData();
   const [inputs, setInputs] = useState<Record<string, string>>({});
+  const [newCategory, setNewCategory] = useState('');
+
+  const handleAddCategory = () => {
+    const trimmed = newCategory.trim();
+    if (!trimmed) return;
+    addExpenseCategory(trimmed);
+    setNewCategory('');
+  };
 
   const spentByCategory = useMemo(() => {
     const currentMonth = monthKey(new Date().toISOString());
@@ -34,8 +41,28 @@ export default function BudgetsSection() {
         </p>
       </div>
 
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+        <label className="text-xs text-slate-500">הוספת קטגוריה חדשה</label>
+        <div className="flex gap-2 mt-1">
+          <input
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
+            placeholder="לדוגמה: חוגים"
+            className="flex-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <button
+            onClick={handleAddCategory}
+            className="flex items-center gap-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            <Plus size={16} />
+            הוספה
+          </button>
+        </div>
+      </div>
+
       <div className="space-y-3">
-        {EXPENSE_CATEGORIES.map((category) => {
+        {data.expenseCategories.map((category) => {
           const limit = data.budgets[category];
           const spent = spentByCategory[category] ?? 0;
           const pct = limit ? Math.min(100, Math.round((spent / limit) * 100)) : 0;
@@ -48,7 +75,17 @@ export default function BudgetsSection() {
               className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4"
             >
               <div className="flex items-center justify-between gap-3 mb-2">
-                <span className="font-semibold text-sm">{category}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold text-sm">{category}</span>
+                  <button
+                    onClick={() => removeExpenseCategory(category)}
+                    className="text-slate-300 hover:text-red-600 p-0.5"
+                    aria-label="הסר קטגוריה"
+                    title="הסרת הקטגוריה מהרשימה"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
                 {limit ? (
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-slate-400">

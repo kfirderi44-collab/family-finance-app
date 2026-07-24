@@ -35,9 +35,10 @@ export interface AppData {
   transactions: Transaction[];
   goals: Goal[];
   budgets: Record<string, number>;
+  expenseCategories: string[];
 }
 
-export const EXPENSE_CATEGORIES = [
+export const DEFAULT_EXPENSE_CATEGORIES = [
   'מזון',
   'דיור',
   'חשבונות',

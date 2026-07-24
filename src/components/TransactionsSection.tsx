@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useAppData } from '../store/AppDataContext';
-import { EXPENSE_CATEGORIES, INCOME_CATEGORIES, type TransactionType } from '../types';
+import { INCOME_CATEGORIES, type TransactionType } from '../types';
 import { formatCurrency, todayIso } from '../utils/format';
 import { Plus, Trash2, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
 
@@ -8,18 +8,18 @@ export default function TransactionsSection() {
   const { data, addTransaction, removeTransaction } = useAppData();
   const [type, setType] = useState<TransactionType>('expense');
   const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState<string>(EXPENSE_CATEGORIES[0]);
+  const [category, setCategory] = useState<string>(data.expenseCategories[0] ?? '');
   const [date, setDate] = useState(todayIso());
   const [memberId, setMemberId] = useState(data.members[0]?.id ?? '');
   const [note, setNote] = useState('');
   const [filterMember, setFilterMember] = useState<string>('all');
   const [filterType, setFilterType] = useState<'all' | TransactionType>('all');
 
-  const categories = type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+  const categories = type === 'expense' ? data.expenseCategories : INCOME_CATEGORIES;
 
   const handleTypeChange = (t: TransactionType) => {
     setType(t);
-    setCategory(t === 'expense' ? EXPENSE_CATEGORIES[0] : INCOME_CATEGORIES[0]);
+    setCategory(t === 'expense' ? (data.expenseCategories[0] ?? '') : INCOME_CATEGORIES[0]);
   };
 
   const handleAdd = () => {
