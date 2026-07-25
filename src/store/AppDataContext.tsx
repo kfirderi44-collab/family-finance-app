@@ -86,6 +86,8 @@ interface AppDataContextValue {
   removeBudget: (category: string) => void;
   addExpenseCategory: (name: string) => void;
   removeExpenseCategory: (name: string) => void;
+  renameExpenseCategory: (oldName: string, newName: string) => void;
+  moveExpenseCategory: (index: number, direction: 'up' | 'down') => void;
   nextMemberColor: () => string;
   syncConfig: SyncConfig | null;
   syncStatus: SyncStatus;
@@ -280,6 +282,35 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
           expenseCategories: d.expenseCategories.filter((c) => c !== name),
           budgets,
         };
+      });
+    },
+    renameExpenseCategory: (oldName, newName) => {
+      const trimmed = newName.trim();
+      if (!trimmed || trimmed === oldName) return;
+      setData((d) => {
+        if (!d.expenseCategories.includes(oldName) || d.expenseCategories.includes(trimmed)) return d;
+        const budgets = { ...d.budgets };
+        if (oldName in budgets) {
+          budgets[trimmed] = budgets[oldName];
+          delete budgets[oldName];
+        }
+        return {
+          ...d,
+          expenseCategories: d.expenseCategories.map((c) => (c === oldName ? trimmed : c)),
+          budgets,
+          transactions: d.transactions.map((t) =>
+            t.category === oldName ? { ...t, category: trimmed } : t
+          ),
+        };
+      });
+    },
+    moveExpenseCategory: (index, direction) => {
+      setData((d) => {
+        const target = direction === 'up' ? index - 1 : index + 1;
+        if (target < 0 || target >= d.expenseCategories.length) return d;
+        const categories = [...d.expenseCategories];
+        [categories[index], categories[target]] = [categories[target], categories[index]];
+        return { ...d, expenseCategories: categories };
       });
     },
     nextMemberColor: () => MEMBER_COLORS[data.members.length % MEMBER_COLORS.length],

@@ -1,21 +1,41 @@
 import { useMemo, useState } from 'react';
 import { useAppData } from '../store/AppDataContext';
 import { formatCurrency, formatMonthFull, monthKey, shiftMonthKey } from '../utils/format';
-import { AlertTriangle, X, Trash2, Plus, ChevronRight, ChevronLeft } from 'lucide-react';
+import { AlertTriangle, X, Trash2, Plus, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Pencil, Check } from 'lucide-react';
 
 export default function BudgetsSection() {
-  const { data, setBudget, removeBudget, addExpenseCategory, removeExpenseCategory } = useAppData();
+  const {
+    data,
+    setBudget,
+    removeBudget,
+    addExpenseCategory,
+    removeExpenseCategory,
+    renameExpenseCategory,
+    moveExpenseCategory,
+  } = useAppData();
   const [inputs, setInputs] = useState<Record<string, string>>({});
   const [newCategory, setNewCategory] = useState('');
   const currentMonth = monthKey(new Date().toISOString());
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
   const isCurrentMonth = selectedMonth === currentMonth;
+  const [editingCategory, setEditingCategory] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState('');
 
   const handleAddCategory = () => {
     const trimmed = newCategory.trim();
     if (!trimmed) return;
     addExpenseCategory(trimmed);
     setNewCategory('');
+  };
+
+  const startEditing = (category: string) => {
+    setEditingCategory(category);
+    setEditValue(category);
+  };
+
+  const saveEditing = () => {
+    if (editingCategory) renameExpenseCategory(editingCategory, editValue);
+    setEditingCategory(null);
   };
 
   const spentByCategory = useMemo(() => {
@@ -87,12 +107,13 @@ export default function BudgetsSection() {
       </div>
 
       <div className="space-y-3">
-        {data.expenseCategories.map((category) => {
+        {data.expenseCategories.map((category, index) => {
           const limit = data.budgets[category];
           const spent = spentByCategory[category] ?? 0;
           const pct = limit ? Math.min(100, Math.round((spent / limit) * 100)) : 0;
           const over = limit ? spent > limit : false;
           const barColor = over ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-teal-600';
+          const isEditing = editingCategory === category;
 
           return (
             <div
@@ -100,16 +121,65 @@ export default function BudgetsSection() {
               className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4"
             >
               <div className="flex items-center justify-between gap-3 mb-2">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-semibold text-sm">{category}</span>
-                  <button
-                    onClick={() => removeExpenseCategory(category)}
-                    className="text-slate-300 hover:text-red-600 p-0.5"
-                    aria-label="הסר קטגוריה"
-                    title="הסרת הקטגוריה מהרשימה"
-                  >
-                    <Trash2 size={13} />
-                  </button>
+                <div className="flex items-center gap-1">
+                  <div className="flex flex-col leading-none">
+                    <button
+                      onClick={() => moveExpenseCategory(index, 'up')}
+                      disabled={index === 0}
+                      className="text-slate-300 hover:text-teal-600 disabled:opacity-20 disabled:hover:text-slate-300"
+                      aria-label="הזז למעלה"
+                    >
+                      <ChevronUp size={14} />
+                    </button>
+                    <button
+                      onClick={() => moveExpenseCategory(index, 'down')}
+                      disabled={index === data.expenseCategories.length - 1}
+                      className="text-slate-300 hover:text-teal-600 disabled:opacity-20 disabled:hover:text-slate-300"
+                      aria-label="הזז למטה"
+                    >
+                      <ChevronDown size={14} />
+                    </button>
+                  </div>
+                  {isEditing ? (
+                    <div className="flex items-center gap-1">
+                      <input
+                        autoFocus
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') saveEditing();
+                          if (e.key === 'Escape') setEditingCategory(null);
+                        }}
+                        className="w-28 rounded-lg border border-teal-400 bg-transparent px-2 py-1 text-sm font-semibold focus:outline-none"
+                      />
+                      <button
+                        onClick={saveEditing}
+                        className="text-teal-600 hover:text-teal-700 p-0.5"
+                        aria-label="שמירת שם"
+                      >
+                        <Check size={15} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-semibold text-sm">{category}</span>
+                      <button
+                        onClick={() => startEditing(category)}
+                        className="text-slate-300 hover:text-teal-600 p-0.5"
+                        aria-label="עריכת שם קטגוריה"
+                      >
+                        <Pencil size={12} />
+                      </button>
+                      <button
+                        onClick={() => removeExpenseCategory(category)}
+                        className="text-slate-300 hover:text-red-600 p-0.5"
+                        aria-label="הסר קטגוריה"
+                        title="הסרת הקטגוריה מהרשימה"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  )}
                 </div>
                 {limit ? (
                   <div className="flex items-center gap-2">
