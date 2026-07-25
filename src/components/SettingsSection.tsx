@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAppData } from '../store/AppDataContext';
 import { generateFamilyCode, type FirebaseWebConfig } from '../store/sync';
-import { CloudOff, Cloud, CloudCog, AlertCircle, Copy, Check } from 'lucide-react';
+import { CloudOff, Cloud, CloudCog, AlertCircle, Copy, Check, Settings2 } from 'lucide-react';
 
 const RULES_SNIPPET = `rules_version = '2';
 service cloud.firestore {
@@ -57,18 +57,23 @@ export default function SettingsSection() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold mb-1">הגדרות סנכרון</h2>
-        <p className="text-sm text-slate-500">
-          חברו את האפליקציה ל-Firebase כדי לסנכרן נתונים בזמן אמת בין כל המכשירים של המשפחה.
-        </p>
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-xl bg-cyan-100 dark:bg-cyan-900/40">
+          <Settings2 size={20} className="text-cyan-600 dark:text-cyan-400" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold mb-1">הגדרות סנכרון</h2>
+          <p className="text-sm text-slate-500">
+            חברו את האפליקציה ל-Firebase כדי לסנכרן נתונים בזמן אמת בין כל המכשירים של המשפחה.
+          </p>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 flex items-center gap-3">
         {syncStatus === 'off' && <CloudOff className="text-slate-400" size={22} />}
         {syncStatus === 'connecting' && <CloudCog className="text-amber-500 animate-pulse" size={22} />}
         {syncStatus === 'connected' && <Cloud className="text-emerald-600" size={22} />}
-        {syncStatus === 'error' && <AlertCircle className="text-red-500" size={22} />}
+        {syncStatus === 'error' && <AlertCircle className="text-rose-500" size={22} />}
         <div className="flex-1">
           <div className="text-sm font-medium">
             {syncStatus === 'off' && 'סנכרון כבוי — הנתונים נשמרים רק במכשיר הזה'}
@@ -76,12 +81,12 @@ export default function SettingsSection() {
             {syncStatus === 'connected' && `מסונכרן — קוד משפחה: ${syncConfig?.familyCode}`}
             {syncStatus === 'error' && 'שגיאת חיבור'}
           </div>
-          {syncError && <div className="text-xs text-red-500 mt-0.5">{syncError}</div>}
+          {syncError && <div className="text-xs text-rose-500 mt-0.5">{syncError}</div>}
         </div>
         {syncStatus !== 'off' && (
           <button
             onClick={disconnectSync}
-            className="text-sm text-red-600 hover:underline shrink-0"
+            className="text-sm text-rose-600 hover:underline shrink-0"
           >
             ניתוק
           </button>
@@ -100,7 +105,7 @@ export default function SettingsSection() {
                     href="https://console.firebase.google.com"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-teal-600 hover:underline"
+                    className="text-cyan-600 hover:underline"
                   >
                     console.firebase.google.com
                   </a>
@@ -123,7 +128,7 @@ export default function SettingsSection() {
                 </pre>
                 <button
                   onClick={handleCopyRules}
-                  className="absolute top-2 left-2 text-slate-400 hover:text-teal-600"
+                  className="absolute top-2 left-2 text-slate-400 hover:text-cyan-600"
                   aria-label="העתק"
                 >
                   {copied ? <Check size={16} /> : <Copy size={16} />}
@@ -145,7 +150,7 @@ export default function SettingsSection() {
                 placeholder={'{\n  apiKey: "...",\n  authDomain: "...",\n  projectId: "...",\n  appId: "..."\n}'}
                 rows={6}
                 dir="ltr"
-                className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-teal-500"
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-cyan-500"
               />
             </div>
             <div>
@@ -156,7 +161,7 @@ export default function SettingsSection() {
                   onChange={(e) => setFamilyCode(e.target.value)}
                   placeholder="לדוגמה: ABCD-1234"
                   dir="ltr"
-                  className="flex-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="flex-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
                 />
                 <button
                   onClick={() => setFamilyCode(generateFamilyCode())}
@@ -169,10 +174,10 @@ export default function SettingsSection() {
                 השתמשו באותו קוד בכל המכשירים כדי לסנכרן ביניהם.
               </p>
             </div>
-            {formError && <p className="text-sm text-red-500">{formError}</p>}
+            {formError && <p className="text-sm text-rose-500">{formError}</p>}
             <button
               onClick={handleConnect}
-              className="w-full rounded-lg bg-teal-600 py-2.5 text-sm font-medium text-white hover:bg-teal-700"
+              className="w-full rounded-lg bg-cyan-600 py-2.5 text-sm font-medium text-white hover:bg-cyan-700"
             >
               חיבור וסנכרון
             </button>

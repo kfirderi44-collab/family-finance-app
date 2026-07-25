@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useAppData } from '../store/AppDataContext';
 import { INCOME_CATEGORIES, type TransactionType } from '../types';
 import { formatCurrency, todayIso } from '../utils/format';
-import { Plus, Trash2, ArrowDownCircle, ArrowUpCircle } from 'lucide-react';
+import { Plus, Trash2, ArrowDownCircle, ArrowUpCircle, Receipt } from 'lucide-react';
 
 export default function TransactionsSection() {
   const { data, addTransaction, removeTransaction } = useAppData();
@@ -46,9 +46,14 @@ export default function TransactionsSection() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold mb-1">הכנסות והוצאות</h2>
-        <p className="text-sm text-slate-500">רשמו תנועה חדשה ועקבו אחרי כל ההיסטוריה.</p>
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-xl bg-sky-100 dark:bg-sky-900/40">
+          <Receipt size={20} className="text-sky-600 dark:text-sky-400" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold mb-1">הכנסות והוצאות</h2>
+          <p className="text-sm text-slate-500">רשמו תנועה חדשה ועקבו אחרי כל ההיסטוריה.</p>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
@@ -57,7 +62,7 @@ export default function TransactionsSection() {
             onClick={() => handleTypeChange('expense')}
             className={`flex-1 flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium border ${
               type === 'expense'
-                ? 'bg-red-50 border-red-300 text-red-700 dark:bg-red-950 dark:text-red-300'
+                ? 'bg-rose-50 border-rose-300 text-rose-700 dark:bg-rose-950 dark:text-rose-300'
                 : 'border-slate-300 dark:border-slate-600 text-slate-500'
             }`}
           >
@@ -86,7 +91,7 @@ export default function TransactionsSection() {
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="0"
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
             />
           </div>
           <div>
@@ -94,7 +99,7 @@ export default function TransactionsSection() {
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
             >
               {categories.map((c) => (
                 <option key={c} value={c}>
@@ -109,7 +114,7 @@ export default function TransactionsSection() {
               type="date"
               value={date}
               onChange={(e) => setDate(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
             />
           </div>
           <div>
@@ -117,7 +122,7 @@ export default function TransactionsSection() {
             <select
               value={memberId}
               onChange={(e) => setMemberId(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
             >
               {data.members.map((m) => (
                 <option key={m.id} value={m.id}>
@@ -132,14 +137,14 @@ export default function TransactionsSection() {
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="לדוגמה: קניות שבועיות"
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
             />
           </div>
         </div>
 
         <button
           onClick={handleAdd}
-          className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-teal-600 py-2.5 text-sm font-medium text-white hover:bg-teal-700"
+          className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-sky-600 py-2.5 text-sm font-medium text-white hover:bg-sky-700"
         >
           <Plus size={16} />
           הוספת תנועה
@@ -182,7 +187,7 @@ export default function TransactionsSection() {
             {t.type === 'income' ? (
               <ArrowUpCircle className="text-emerald-600 shrink-0" size={20} />
             ) : (
-              <ArrowDownCircle className="text-red-500 shrink-0" size={20} />
+              <ArrowDownCircle className="text-rose-500 shrink-0" size={20} />
             )}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 text-sm font-medium">
@@ -200,7 +205,7 @@ export default function TransactionsSection() {
             </div>
             <span
               className={`text-sm font-semibold ${
-                t.type === 'income' ? 'text-emerald-600' : 'text-red-500'
+                t.type === 'income' ? 'text-emerald-600' : 'text-rose-500'
               }`}
             >
               {t.type === 'income' ? '+' : '-'}
@@ -208,7 +213,7 @@ export default function TransactionsSection() {
             </span>
             <button
               onClick={() => removeTransaction(t.id)}
-              className="text-slate-400 hover:text-red-600 p-1"
+              className="text-slate-400 hover:text-rose-600 p-1"
               aria-label="מחק"
             >
               <Trash2 size={16} />

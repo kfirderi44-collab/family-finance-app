@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useAppData } from '../store/AppDataContext';
 import { formatCurrency, formatMonthLabel, monthKey } from '../utils/format';
+import { BarChart3 } from 'lucide-react';
 import {
   BarChart,
   Bar,
@@ -91,9 +92,14 @@ export default function Reports() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold mb-1">דוחות וגרפים</h2>
-        <p className="text-sm text-slate-500">ניתוח מגמות ההוצאות וההכנסות המשפחתיות.</p>
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-xl bg-fuchsia-100 dark:bg-fuchsia-900/40">
+          <BarChart3 size={20} className="text-fuchsia-600 dark:text-fuchsia-400" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold mb-1">דוחות וגרפים</h2>
+          <p className="text-sm text-slate-500">ניתוח מגמות ההוצאות וההכנסות המשפחתיות.</p>
+        </div>
       </div>
 
       {!hasData ? (
@@ -137,9 +143,9 @@ export default function Reports() {
                     >
                       <td className="py-2 font-medium">{m.label}</td>
                       <td className="py-2 text-emerald-600">{formatCurrency(m.income)}</td>
-                      <td className="py-2 text-red-500">{formatCurrency(m.expense)}</td>
+                      <td className="py-2 text-rose-500">{formatCurrency(m.expense)}</td>
                       <td
-                        className={`py-2 font-semibold ${m.net >= 0 ? 'text-emerald-600' : 'text-red-500'}`}
+                        className={`py-2 font-semibold ${m.net >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}
                       >
                         {formatCurrency(m.net)}
                       </td>

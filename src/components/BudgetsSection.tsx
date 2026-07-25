@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useAppData } from '../store/AppDataContext';
 import { formatCurrency, formatMonthFull, monthKey, shiftMonthKey } from '../utils/format';
-import { AlertTriangle, X, Trash2, Plus, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Pencil, Check } from 'lucide-react';
+import { AlertTriangle, X, Trash2, Plus, ChevronRight, ChevronLeft, ChevronUp, ChevronDown, Pencil, Check, Target } from 'lucide-react';
 
 export default function BudgetsSection() {
   const {
@@ -56,12 +56,17 @@ export default function BudgetsSection() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold mb-1">תקציבים לפי קטגוריה</h2>
-        <p className="text-sm text-slate-500">
-          קבעו תקרת הוצאה חודשית לכל קטגוריה, ועקבו כמה נשאר לכם — מתעדכן אוטומטית בכל הוצאה חדשה.
-          התקרה קבועה מחודש לחודש, וההוצאות מתאפסות בכל חודש חדש; אפשר לחזור ולראות חודשים קודמים.
-        </p>
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-xl bg-violet-100 dark:bg-violet-900/40">
+          <Target size={20} className="text-violet-600 dark:text-violet-400" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold mb-1">תקציבים לפי קטגוריה</h2>
+          <p className="text-sm text-slate-500">
+            קבעו תקרת הוצאה חודשית לכל קטגוריה, ועקבו כמה נשאר לכם — מתעדכן אוטומטית בכל הוצאה חדשה.
+            התקרה קבועה מחודש לחודש, וההוצאות מתאפסות בכל חודש חדש; אפשר לחזור ולראות חודשים קודמים.
+          </p>
+        </div>
       </div>
 
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
@@ -72,11 +77,11 @@ export default function BudgetsSection() {
             onChange={(e) => setNewCategory(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
             placeholder="לדוגמה: חוגים"
-            className="flex-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+            className="flex-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
           />
           <button
             onClick={handleAddCategory}
-            className="flex items-center gap-1 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700"
+            className="flex items-center gap-1 rounded-lg bg-violet-600 px-4 py-2 text-sm font-medium text-white hover:bg-violet-700"
           >
             <Plus size={16} />
             הוספה
@@ -94,7 +99,7 @@ export default function BudgetsSection() {
         </button>
         <div className="text-sm font-semibold">
           {formatMonthFull(selectedMonth)}
-          {isCurrentMonth && <span className="text-xs text-teal-600 font-normal mr-1.5">(חודש נוכחי)</span>}
+          {isCurrentMonth && <span className="text-xs text-violet-600 font-normal mr-1.5">(חודש נוכחי)</span>}
         </div>
         <button
           onClick={() => setSelectedMonth((m) => shiftMonthKey(m, 1))}
@@ -112,7 +117,7 @@ export default function BudgetsSection() {
           const spent = spentByCategory[category] ?? 0;
           const pct = limit ? Math.min(100, Math.round((spent / limit) * 100)) : 0;
           const over = limit ? spent > limit : false;
-          const barColor = over ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-teal-600';
+          const barColor = over ? 'bg-rose-500' : pct >= 80 ? 'bg-amber-500' : 'bg-violet-600';
           const isEditing = editingCategory === category;
 
           return (
@@ -126,7 +131,7 @@ export default function BudgetsSection() {
                     <button
                       onClick={() => moveExpenseCategory(index, 'up')}
                       disabled={index === 0}
-                      className="text-slate-300 hover:text-teal-600 disabled:opacity-20 disabled:hover:text-slate-300"
+                      className="text-slate-300 hover:text-violet-600 disabled:opacity-20 disabled:hover:text-slate-300"
                       aria-label="הזז למעלה"
                     >
                       <ChevronUp size={14} />
@@ -134,7 +139,7 @@ export default function BudgetsSection() {
                     <button
                       onClick={() => moveExpenseCategory(index, 'down')}
                       disabled={index === data.expenseCategories.length - 1}
-                      className="text-slate-300 hover:text-teal-600 disabled:opacity-20 disabled:hover:text-slate-300"
+                      className="text-slate-300 hover:text-violet-600 disabled:opacity-20 disabled:hover:text-slate-300"
                       aria-label="הזז למטה"
                     >
                       <ChevronDown size={14} />
@@ -150,11 +155,11 @@ export default function BudgetsSection() {
                           if (e.key === 'Enter') saveEditing();
                           if (e.key === 'Escape') setEditingCategory(null);
                         }}
-                        className="w-28 rounded-lg border border-teal-400 bg-transparent px-2 py-1 text-sm font-semibold focus:outline-none"
+                        className="w-28 rounded-lg border border-violet-400 bg-transparent px-2 py-1 text-sm font-semibold focus:outline-none"
                       />
                       <button
                         onClick={saveEditing}
-                        className="text-teal-600 hover:text-teal-700 p-0.5"
+                        className="text-violet-600 hover:text-violet-700 p-0.5"
                         aria-label="שמירת שם"
                       >
                         <Check size={15} />
@@ -165,14 +170,14 @@ export default function BudgetsSection() {
                       <span className="font-semibold text-sm">{category}</span>
                       <button
                         onClick={() => startEditing(category)}
-                        className="text-slate-300 hover:text-teal-600 p-0.5"
+                        className="text-slate-300 hover:text-violet-600 p-0.5"
                         aria-label="עריכת שם קטגוריה"
                       >
                         <Pencil size={12} />
                       </button>
                       <button
                         onClick={() => removeExpenseCategory(category)}
-                        className="text-slate-300 hover:text-red-600 p-0.5"
+                        className="text-slate-300 hover:text-rose-600 p-0.5"
                         aria-label="הסר קטגוריה"
                         title="הסרת הקטגוריה מהרשימה"
                       >
@@ -188,7 +193,7 @@ export default function BudgetsSection() {
                     </span>
                     <button
                       onClick={() => removeBudget(category)}
-                      className="text-slate-400 hover:text-red-600 p-1"
+                      className="text-slate-400 hover:text-rose-600 p-1"
                       aria-label="הסר תקציב"
                     >
                       <X size={14} />
@@ -205,11 +210,11 @@ export default function BudgetsSection() {
                       }
                       onKeyDown={(e) => e.key === 'Enter' && handleSave(category)}
                       placeholder="הגדר תקרה"
-                      className="w-28 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+                      className="w-28 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500"
                     />
                     <button
                       onClick={() => handleSave(category)}
-                      className="rounded-lg bg-teal-600 px-3 py-1 text-sm font-medium text-white hover:bg-teal-700"
+                      className="rounded-lg bg-violet-600 px-3 py-1 text-sm font-medium text-white hover:bg-violet-700"
                     >
                       שמירה
                     </button>
@@ -223,7 +228,7 @@ export default function BudgetsSection() {
                     <span>
                       {formatCurrency(spent)} מתוך {formatCurrency(limit)}
                     </span>
-                    <span className={over ? 'text-red-500 font-semibold' : ''}>{pct}%</span>
+                    <span className={over ? 'text-rose-500 font-semibold' : ''}>{pct}%</span>
                   </div>
                   <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
                     <div
@@ -232,7 +237,7 @@ export default function BudgetsSection() {
                     />
                   </div>
                   {over && (
-                    <div className="flex items-center gap-1.5 text-xs text-red-500 mt-1.5">
+                    <div className="flex items-center gap-1.5 text-xs text-rose-500 mt-1.5">
                       <AlertTriangle size={13} />
                       חריגה של {formatCurrency(spent - limit)} מהתקציב החודשי
                     </div>

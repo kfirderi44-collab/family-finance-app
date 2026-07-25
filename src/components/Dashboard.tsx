@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useAppData } from '../store/AppDataContext';
 import { formatCurrency, monthKey } from '../utils/format';
-import { ArrowDownCircle, ArrowUpCircle, Wallet, PiggyBank } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Wallet, PiggyBank, LayoutDashboard } from 'lucide-react';
 
 type Tab = 'dashboard' | 'transactions' | 'goals' | 'budgets' | 'members' | 'reports';
 
@@ -70,47 +70,69 @@ export default function Dashboard({ onNavigate }: Props) {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold mb-1">סקירה כללית</h2>
-        <p className="text-sm text-slate-500">מצב הכספים המשפחתי בזמן אמת.</p>
+      <div className="flex items-center gap-3">
+        <div className="p-2 rounded-xl bg-teal-100 dark:bg-teal-900/40">
+          <LayoutDashboard size={20} className="text-teal-600 dark:text-teal-400" />
+        </div>
+        <div>
+          <h2 className="text-xl font-bold mb-1">סקירה כללית</h2>
+          <p className="text-sm text-slate-500">מצב הכספים המשפחתי בזמן אמת.</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
-            <Wallet size={14} /> יתרה כוללת
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-lg bg-teal-100 dark:bg-teal-900/40">
+              <Wallet size={15} className="text-teal-600 dark:text-teal-400" />
+            </div>
+            <span className="text-xs text-slate-500">יתרה כוללת</span>
           </div>
-          <div className={`text-lg font-bold ${stats.balance >= 0 ? 'text-emerald-600' : 'text-red-500'}`}>
+          <div className={`text-lg font-bold ${stats.balance >= 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
             {formatCurrency(stats.balance)}
           </div>
         </div>
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
-            <ArrowUpCircle size={14} /> הכנסות החודש
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-lg bg-emerald-100 dark:bg-emerald-900/40">
+              <ArrowUpCircle size={15} className="text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <span className="text-xs text-slate-500">הכנסות החודש</span>
           </div>
           <div className="text-lg font-bold text-emerald-600">{formatCurrency(stats.monthIncome)}</div>
         </div>
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
-            <ArrowDownCircle size={14} /> הוצאות החודש
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-lg bg-rose-100 dark:bg-rose-900/40">
+              <ArrowDownCircle size={15} className="text-rose-600 dark:text-rose-400" />
+            </div>
+            <span className="text-xs text-slate-500">הוצאות החודש</span>
           </div>
-          <div className="text-lg font-bold text-red-500">{formatCurrency(stats.monthExpense)}</div>
+          <div className="text-lg font-bold text-rose-500">{formatCurrency(stats.monthExpense)}</div>
         </div>
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
-          <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
-            <PiggyBank size={14} /> סה"כ נחסך
+          <div className="flex items-center gap-2 mb-2">
+            <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-900/40">
+              <PiggyBank size={15} className="text-amber-600 dark:text-amber-400" />
+            </div>
+            <span className="text-xs text-slate-500">סה"כ נחסך</span>
           </div>
-          <div className="text-lg font-bold text-teal-600">{formatCurrency(totalSaved)}</div>
+          <div className="text-lg font-bold text-amber-600">{formatCurrency(totalSaved)}</div>
         </div>
       </div>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-sm">תנועות אחרונות</h3>
+            <h3 className="font-semibold text-sm flex items-center gap-2">
+              <span className="p-1 rounded-md bg-sky-100 dark:bg-sky-900/40">
+                <ArrowUpCircle size={13} className="text-sky-600 dark:text-sky-400" />
+              </span>
+              תנועות אחרונות
+            </h3>
             <button
               onClick={() => onNavigate('transactions')}
-              className="text-xs text-teal-600 hover:underline"
+              className="text-xs text-sky-600 hover:underline"
             >
               לכל התנועות
             </button>
@@ -124,12 +146,12 @@ export default function Dashboard({ onNavigate }: Props) {
                   {t.type === 'income' ? (
                     <ArrowUpCircle className="text-emerald-600 shrink-0" size={16} />
                   ) : (
-                    <ArrowDownCircle className="text-red-500 shrink-0" size={16} />
+                    <ArrowDownCircle className="text-rose-500 shrink-0" size={16} />
                   )}
                   <span className="flex-1 truncate">
                     {t.category} · {memberById[t.memberId]?.name}
                   </span>
-                  <span className={t.type === 'income' ? 'text-emerald-600' : 'text-red-500'}>
+                  <span className={t.type === 'income' ? 'text-emerald-600' : 'text-rose-500'}>
                     {t.type === 'income' ? '+' : '-'}
                     {formatCurrency(t.amount)}
                   </span>
@@ -141,10 +163,15 @@ export default function Dashboard({ onNavigate }: Props) {
 
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-sm">יעדי חיסכון</h3>
+            <h3 className="font-semibold text-sm flex items-center gap-2">
+              <span className="p-1 rounded-md bg-amber-100 dark:bg-amber-900/40">
+                <PiggyBank size={13} className="text-amber-600 dark:text-amber-400" />
+              </span>
+              יעדי חיסכון
+            </h3>
             <button
               onClick={() => onNavigate('goals')}
-              className="text-xs text-teal-600 hover:underline"
+              className="text-xs text-amber-600 hover:underline"
             >
               לכל היעדים
             </button>
@@ -163,7 +190,7 @@ export default function Dashboard({ onNavigate }: Props) {
                       <span className="text-slate-400">{pct}%</span>
                     </div>
                     <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
-                      <div className="h-full bg-teal-600 rounded-full" style={{ width: `${pct}%` }} />
+                      <div className="h-full bg-amber-500 rounded-full" style={{ width: `${pct}%` }} />
                     </div>
                   </li>
                 );
@@ -174,10 +201,15 @@ export default function Dashboard({ onNavigate }: Props) {
 
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-sm">תקציבים</h3>
+            <h3 className="font-semibold text-sm flex items-center gap-2">
+              <span className="p-1 rounded-md bg-violet-100 dark:bg-violet-900/40">
+                <Wallet size={13} className="text-violet-600 dark:text-violet-400" />
+              </span>
+              תקציבים
+            </h3>
             <button
               onClick={() => onNavigate('budgets')}
-              className="text-xs text-teal-600 hover:underline"
+              className="text-xs text-violet-600 hover:underline"
             >
               לכל התקציבים
             </button>
@@ -193,13 +225,13 @@ export default function Dashboard({ onNavigate }: Props) {
                   <li key={category}>
                     <div className="flex justify-between text-xs mb-1">
                       <span className="font-medium">{category}</span>
-                      <span className={over ? 'text-red-500 font-semibold' : 'text-slate-400'}>
+                      <span className={over ? 'text-rose-500 font-semibold' : 'text-slate-400'}>
                         {pct}%
                       </span>
                     </div>
                     <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
                       <div
-                        className={`h-full rounded-full ${over ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-teal-600'}`}
+                        className={`h-full rounded-full ${over ? 'bg-rose-500' : pct >= 80 ? 'bg-amber-500' : 'bg-violet-600'}`}
                         style={{ width: `${pct}%` }}
                       />
                     </div>

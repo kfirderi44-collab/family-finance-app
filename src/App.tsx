@@ -10,16 +10,27 @@ import BudgetsSection from './components/BudgetsSection';
 import { LayoutDashboard, Receipt, PiggyBank, Users, BarChart3, Wallet, Settings, Target } from 'lucide-react';
 
 type Tab = 'dashboard' | 'transactions' | 'goals' | 'budgets' | 'members' | 'reports' | 'settings';
+type TabColor = 'teal' | 'sky' | 'violet' | 'amber' | 'fuchsia' | 'rose' | 'cyan';
 
-const TABS: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
-  { id: 'dashboard', label: 'סקירה', icon: LayoutDashboard },
-  { id: 'transactions', label: 'הכנסות והוצאות', icon: Receipt },
-  { id: 'budgets', label: 'תקציבים', icon: Target },
-  { id: 'goals', label: 'יעדי חיסכון', icon: PiggyBank },
-  { id: 'reports', label: 'דוחות', icon: BarChart3 },
-  { id: 'members', label: 'בני משפחה', icon: Users },
-  { id: 'settings', label: 'סנכרון', icon: Settings },
+const TABS: { id: Tab; label: string; icon: typeof LayoutDashboard; color: TabColor }[] = [
+  { id: 'dashboard', label: 'סקירה', icon: LayoutDashboard, color: 'teal' },
+  { id: 'transactions', label: 'הכנסות והוצאות', icon: Receipt, color: 'sky' },
+  { id: 'budgets', label: 'תקציבים', icon: Target, color: 'violet' },
+  { id: 'goals', label: 'יעדי חיסכון', icon: PiggyBank, color: 'amber' },
+  { id: 'reports', label: 'דוחות', icon: BarChart3, color: 'fuchsia' },
+  { id: 'members', label: 'בני משפחה', icon: Users, color: 'rose' },
+  { id: 'settings', label: 'סנכרון', icon: Settings, color: 'cyan' },
 ];
+
+const TAB_ACTIVE_CLASSES: Record<TabColor, string> = {
+  teal: 'bg-teal-100 text-teal-700 dark:bg-teal-900/50 dark:text-teal-300',
+  sky: 'bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300',
+  violet: 'bg-violet-100 text-violet-700 dark:bg-violet-900/50 dark:text-violet-300',
+  amber: 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+  fuchsia: 'bg-fuchsia-100 text-fuchsia-700 dark:bg-fuchsia-900/50 dark:text-fuchsia-300',
+  rose: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
+  cyan: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300',
+};
 
 function AppShell() {
   const [tab, setTab] = useState<Tab>('dashboard');
@@ -29,21 +40,23 @@ function AppShell() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
-      <header className="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-sky-50 to-violet-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 text-slate-900 dark:text-slate-100">
+      <header className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-2">
-          <Wallet className="text-teal-600 dark:text-teal-400" size={28} />
+          <div className="p-1.5 rounded-xl bg-gradient-to-br from-teal-500 to-sky-500 shadow-sm">
+            <Wallet className="text-white" size={20} />
+          </div>
           <h1 className="text-lg font-bold">תכנון פיננסי משפחת דראי</h1>
         </div>
-        <nav className="max-w-5xl mx-auto px-2 flex gap-1 overflow-x-auto">
-          {TABS.map(({ id, label, icon: Icon }) => (
+        <nav className="max-w-5xl mx-auto px-2 pb-2 flex gap-1.5 overflow-x-auto">
+          {TABS.map(({ id, label, icon: Icon, color }) => (
             <button
               key={id}
               onClick={() => setTab(id)}
-              className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 whitespace-nowrap transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                 tab === id
-                  ? 'border-teal-600 text-teal-600 dark:text-teal-400'
-                  : 'border-transparent text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'
+                  ? TAB_ACTIVE_CLASSES[color]
+                  : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700/50'
               }`}
             >
               <Icon size={16} />
