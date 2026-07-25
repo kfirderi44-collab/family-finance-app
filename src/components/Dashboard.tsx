@@ -100,7 +100,7 @@ export default function Dashboard({ onNavigate }: Props) {
           <div className="flex items-center gap-1.5 text-xs text-slate-500 mb-1">
             <PiggyBank size={14} /> סה"כ נחסך
           </div>
-          <div className="text-lg font-bold text-indigo-600">{formatCurrency(totalSaved)}</div>
+          <div className="text-lg font-bold text-teal-600">{formatCurrency(totalSaved)}</div>
         </div>
       </div>
 
@@ -110,7 +110,7 @@ export default function Dashboard({ onNavigate }: Props) {
             <h3 className="font-semibold text-sm">תנועות אחרונות</h3>
             <button
               onClick={() => onNavigate('transactions')}
-              className="text-xs text-indigo-600 hover:underline"
+              className="text-xs text-teal-600 hover:underline"
             >
               לכל התנועות
             </button>
@@ -144,7 +144,7 @@ export default function Dashboard({ onNavigate }: Props) {
             <h3 className="font-semibold text-sm">יעדי חיסכון</h3>
             <button
               onClick={() => onNavigate('goals')}
-              className="text-xs text-indigo-600 hover:underline"
+              className="text-xs text-teal-600 hover:underline"
             >
               לכל היעדים
             </button>
@@ -163,7 +163,7 @@ export default function Dashboard({ onNavigate }: Props) {
                       <span className="text-slate-400">{pct}%</span>
                     </div>
                     <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
-                      <div className="h-full bg-indigo-600 rounded-full" style={{ width: `${pct}%` }} />
+                      <div className="h-full bg-teal-600 rounded-full" style={{ width: `${pct}%` }} />
                     </div>
                   </li>
                 );
@@ -177,7 +177,7 @@ export default function Dashboard({ onNavigate }: Props) {
             <h3 className="font-semibold text-sm">תקציבים</h3>
             <button
               onClick={() => onNavigate('budgets')}
-              className="text-xs text-indigo-600 hover:underline"
+              className="text-xs text-teal-600 hover:underline"
             >
               לכל התקציבים
             </button>
@@ -199,7 +199,7 @@ export default function Dashboard({ onNavigate }: Props) {
                     </div>
                     <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-slate-700 overflow-hidden">
                       <div
-                        className={`h-full rounded-full ${over ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-indigo-600'}`}
+                        className={`h-full rounded-full ${over ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-teal-600'}`}
                         style={{ width: `${pct}%` }}
                       />
                     </div>

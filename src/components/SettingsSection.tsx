@@ -100,7 +100,7 @@ export default function SettingsSection() {
                     href="https://console.firebase.google.com"
                     target="_blank"
                     rel="noreferrer"
-                    className="text-indigo-600 hover:underline"
+                    className="text-teal-600 hover:underline"
                   >
                     console.firebase.google.com
                   </a>
@@ -123,7 +123,7 @@ export default function SettingsSection() {
                 </pre>
                 <button
                   onClick={handleCopyRules}
-                  className="absolute top-2 left-2 text-slate-400 hover:text-indigo-600"
+                  className="absolute top-2 left-2 text-slate-400 hover:text-teal-600"
                   aria-label="העתק"
                 >
                   {copied ? <Check size={16} /> : <Copy size={16} />}
@@ -145,7 +145,7 @@ export default function SettingsSection() {
                 placeholder={'{\n  apiKey: "...",\n  authDomain: "...",\n  projectId: "...",\n  appId: "..."\n}'}
                 rows={6}
                 dir="ltr"
-                className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-xs font-mono focus:outline-none focus:ring-2 focus:ring-teal-500"
               />
             </div>
             <div>
@@ -156,7 +156,7 @@ export default function SettingsSection() {
                   onChange={(e) => setFamilyCode(e.target.value)}
                   placeholder="לדוגמה: ABCD-1234"
                   dir="ltr"
-                  className="flex-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="flex-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                 />
                 <button
                   onClick={() => setFamilyCode(generateFamilyCode())}
@@ -172,7 +172,7 @@ export default function SettingsSection() {
             {formError && <p className="text-sm text-red-500">{formError}</p>}
             <button
               onClick={handleConnect}
-              className="w-full rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
+              className="w-full rounded-lg bg-teal-600 py-2.5 text-sm font-medium text-white hover:bg-teal-700"
             >
               חיבור וסנכרון
             </button>

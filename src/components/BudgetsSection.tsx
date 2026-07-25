@@ -52,11 +52,11 @@ export default function BudgetsSection() {
             onChange={(e) => setNewCategory(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAddCategory()}
             placeholder="לדוגמה: חוגים"
-            className="flex-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="flex-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
           />
           <button
             onClick={handleAddCategory}
-            className="flex items-center gap-1 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            className="flex items-center gap-1 rounded-lg bg-teal-600 px-4 py-2 text-sm font-medium text-white hover:bg-teal-700"
           >
             <Plus size={16} />
             הוספה
@@ -74,7 +74,7 @@ export default function BudgetsSection() {
         </button>
         <div className="text-sm font-semibold">
           {formatMonthFull(selectedMonth)}
-          {isCurrentMonth && <span className="text-xs text-indigo-600 font-normal mr-1.5">(חודש נוכחי)</span>}
+          {isCurrentMonth && <span className="text-xs text-teal-600 font-normal mr-1.5">(חודש נוכחי)</span>}
         </div>
         <button
           onClick={() => setSelectedMonth((m) => shiftMonthKey(m, 1))}
@@ -92,7 +92,7 @@ export default function BudgetsSection() {
           const spent = spentByCategory[category] ?? 0;
           const pct = limit ? Math.min(100, Math.round((spent / limit) * 100)) : 0;
           const over = limit ? spent > limit : false;
-          const barColor = over ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-indigo-600';
+          const barColor = over ? 'bg-red-500' : pct >= 80 ? 'bg-amber-500' : 'bg-teal-600';
 
           return (
             <div
@@ -135,11 +135,11 @@ export default function BudgetsSection() {
                       }
                       onKeyDown={(e) => e.key === 'Enter' && handleSave(category)}
                       placeholder="הגדר תקרה"
-                      className="w-28 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      className="w-28 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                     />
                     <button
                       onClick={() => handleSave(category)}
-                      className="rounded-lg bg-indigo-600 px-3 py-1 text-sm font-medium text-white hover:bg-indigo-700"
+                      className="rounded-lg bg-teal-600 px-3 py-1 text-sm font-medium text-white hover:bg-teal-700"
                     >
                       שמירה
                     </button>

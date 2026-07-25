@@ -18,8 +18,8 @@ import {
 } from 'recharts';
 
 const CATEGORY_COLORS = [
-  '#4f46e5', '#059669', '#d97706', '#dc2626', '#0891b2',
-  '#9333ea', '#65a30d', '#e11d48', '#0d9488', '#a855f7',
+  '#0d9488', '#059669', '#d97706', '#dc2626', '#0891b2',
+  '#9333ea', '#65a30d', '#e11d48', '#4f46e5', '#a855f7',
 ];
 
 export default function Reports() {

@@ -22,7 +22,7 @@ import {
 const STORAGE_KEY = 'family-finance-app-data';
 const TIMESTAMP_KEY = 'family-finance-data-timestamp';
 
-const MEMBER_COLORS = ['#4f46e5', '#059669', '#d97706', '#dc2626', '#0891b2', '#9333ea'];
+const MEMBER_COLORS = ['#0d9488', '#059669', '#d97706', '#dc2626', '#0891b2', '#9333ea'];
 
 function loadDataTimestamp(): number {
   const raw = localStorage.getItem(TIMESTAMP_KEY);
