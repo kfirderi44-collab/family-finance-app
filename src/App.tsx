@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { AppDataProvider } from './store/AppDataContext';
 import Dashboard from './components/Dashboard';
 import TransactionsSection from './components/TransactionsSection';
@@ -23,6 +23,10 @@ const TABS: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
 
 function AppShell() {
   const [tab, setTab] = useState<Tab>('dashboard');
+
+  useEffect(() => {
+    document.getElementById('splash')?.classList.add('hidden');
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100">
