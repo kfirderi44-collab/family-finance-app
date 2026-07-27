@@ -14,6 +14,17 @@ export interface Transaction {
   date: string; // ISO date (yyyy-mm-dd)
   memberId: string;
   note?: string;
+  recurringId?: string;
+}
+
+export interface RecurringExpense {
+  id: string;
+  name: string;
+  amount: number;
+  category: string;
+  memberId: string;
+  dayOfMonth: number; // 1-28
+  active: boolean;
 }
 
 export interface Contribution {
@@ -36,6 +47,7 @@ export interface AppData {
   goals: Goal[];
   budgets: Record<string, number>;
   expenseCategories: string[];
+  recurringExpenses: RecurringExpense[];
 }
 
 export const DEFAULT_EXPENSE_CATEGORIES = [

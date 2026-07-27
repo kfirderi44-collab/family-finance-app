@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { v4 as uuid } from 'uuid';
-import { DEFAULT_EXPENSE_CATEGORIES, type AppData, type Contribution, type Goal, type Member, type Transaction } from '../types';
+import { DEFAULT_EXPENSE_CATEGORIES, type AppData, type Contribution, type Goal, type Member, type RecurringExpense, type Transaction } from '../types';
 import {
   loadSyncConfig,
   saveSyncConfig,
@@ -41,6 +41,7 @@ function defaultData(): AppData {
     goals: [],
     budgets: {},
     expenseCategories: [...DEFAULT_EXPENSE_CATEGORIES],
+    recurringExpenses: [],
   };
 }
 
@@ -52,7 +53,41 @@ function normalizeData(d: Partial<AppData>): AppData {
     goals: d.goals ?? [],
     budgets: d.budgets ?? {},
     expenseCategories: d.expenseCategories ?? [...DEFAULT_EXPENSE_CATEGORIES],
+    recurringExpenses: d.recurringExpenses ?? [],
   };
+}
+
+// Creates transactions for any active recurring expense that's due this
+// month and hasn't been generated yet, so fixed costs (insurance,
+// subscriptions...) show up without the user re-entering them every month.
+function generateDueRecurringTransactions(d: AppData): AppData {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const day = today.getDate();
+  const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  const due = d.recurringExpenses.filter(
+    (r) =>
+      r.active &&
+      r.dayOfMonth <= day &&
+      !d.transactions.some((t) => t.recurringId === r.id && t.date.startsWith(monthPrefix))
+  );
+  if (due.length === 0) return d;
+
+  const generated: Transaction[] = due.map((r) => ({
+    id: uuid(),
+    type: 'expense',
+    amount: r.amount,
+    category: r.category,
+    date: `${monthPrefix}-${String(Math.min(r.dayOfMonth, daysInMonth)).padStart(2, '0')}`,
+    memberId: r.memberId,
+    note: r.name,
+    recurringId: r.id,
+  }));
+
+  return { ...d, transactions: [...d.transactions, ...generated] };
 }
 
 function loadData(): AppData {
@@ -88,6 +123,9 @@ interface AppDataContextValue {
   removeExpenseCategory: (name: string) => void;
   renameExpenseCategory: (oldName: string, newName: string) => void;
   moveExpenseCategory: (index: number, direction: 'up' | 'down') => void;
+  addRecurringExpense: (r: Omit<RecurringExpense, 'id' | 'active'>) => void;
+  updateRecurringExpense: (id: string, updates: Partial<Omit<RecurringExpense, 'id'>>) => void;
+  removeRecurringExpense: (id: string) => void;
   nextMemberColor: () => string;
   syncConfig: SyncConfig | null;
   syncStatus: SyncStatus;
@@ -191,6 +229,15 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [data]);
+
+  useEffect(() => {
+    // While a remote family is still loading, wait for its data before
+    // generating — otherwise a device with an empty local cache could
+    // create duplicates of entries another device already generated.
+    if (syncConfig && syncStatus === 'connecting') return;
+    setData((d) => generateDueRecurringTransactions(d));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data.recurringExpenses, syncConfig, syncStatus]);
 
   const value = useMemo<AppDataContextValue>(() => ({
     data,
@@ -312,6 +359,30 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         [categories[index], categories[target]] = [categories[target], categories[index]];
         return { ...d, expenseCategories: categories };
       });
+    },
+    addRecurringExpense: (r) => {
+      setData((d) =>
+        generateDueRecurringTransactions({
+          ...d,
+          recurringExpenses: [...d.recurringExpenses, { ...r, id: uuid(), active: true }],
+        })
+      );
+    },
+    updateRecurringExpense: (id, updates) => {
+      setData((d) =>
+        generateDueRecurringTransactions({
+          ...d,
+          recurringExpenses: d.recurringExpenses.map((r) =>
+            r.id === id ? { ...r, ...updates } : r
+          ),
+        })
+      );
+    },
+    removeRecurringExpense: (id) => {
+      setData((d) => ({
+        ...d,
+        recurringExpenses: d.recurringExpenses.filter((r) => r.id !== id),
+      }));
     },
     nextMemberColor: () => MEMBER_COLORS[data.members.length % MEMBER_COLORS.length],
     syncConfig,
