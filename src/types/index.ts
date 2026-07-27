@@ -27,6 +27,16 @@ export interface RecurringExpense {
   active: boolean;
 }
 
+export type TaskScope = 'general' | 'week' | 'month';
+
+export interface FamilyTask {
+  id: string;
+  title: string;
+  scope: TaskScope;
+  memberId?: string;
+  done: boolean;
+}
+
 export interface Contribution {
   id: string;
   amount: number;
@@ -48,6 +58,7 @@ export interface AppData {
   budgets: Record<string, number>;
   expenseCategories: string[];
   recurringExpenses: RecurringExpense[];
+  tasks: FamilyTask[];
 }
 
 export const DEFAULT_EXPENSE_CATEGORIES = [

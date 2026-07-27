@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { v4 as uuid } from 'uuid';
-import { DEFAULT_EXPENSE_CATEGORIES, type AppData, type Contribution, type Goal, type Member, type RecurringExpense, type Transaction } from '../types';
+import { DEFAULT_EXPENSE_CATEGORIES, type AppData, type Contribution, type Goal, type Member, type RecurringExpense, type TaskScope, type Transaction } from '../types';
 import {
   loadSyncConfig,
   saveSyncConfig,
@@ -42,6 +42,7 @@ function defaultData(): AppData {
     budgets: {},
     expenseCategories: [...DEFAULT_EXPENSE_CATEGORIES],
     recurringExpenses: [],
+    tasks: [],
   };
 }
 
@@ -54,6 +55,7 @@ function normalizeData(d: Partial<AppData>): AppData {
     budgets: d.budgets ?? {},
     expenseCategories: d.expenseCategories ?? [...DEFAULT_EXPENSE_CATEGORIES],
     recurringExpenses: d.recurringExpenses ?? [],
+    tasks: d.tasks ?? [],
   };
 }
 
@@ -126,6 +128,9 @@ interface AppDataContextValue {
   addRecurringExpense: (r: Omit<RecurringExpense, 'id' | 'active'>) => void;
   updateRecurringExpense: (id: string, updates: Partial<Omit<RecurringExpense, 'id'>>) => void;
   removeRecurringExpense: (id: string) => void;
+  addTask: (title: string, scope: TaskScope, memberId?: string) => void;
+  toggleTask: (id: string) => void;
+  removeTask: (id: string) => void;
   nextMemberColor: () => string;
   syncConfig: SyncConfig | null;
   syncStatus: SyncStatus;
@@ -383,6 +388,23 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         ...d,
         recurringExpenses: d.recurringExpenses.filter((r) => r.id !== id),
       }));
+    },
+    addTask: (title, scope, memberId) => {
+      const trimmed = title.trim();
+      if (!trimmed) return;
+      setData((d) => ({
+        ...d,
+        tasks: [...d.tasks, { id: uuid(), title: trimmed, scope, memberId, done: false }],
+      }));
+    },
+    toggleTask: (id) => {
+      setData((d) => ({
+        ...d,
+        tasks: d.tasks.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
+      }));
+    },
+    removeTask: (id) => {
+      setData((d) => ({ ...d, tasks: d.tasks.filter((t) => t.id !== id) }));
     },
     nextMemberColor: () => MEMBER_COLORS[data.members.length % MEMBER_COLORS.length],
     syncConfig,

@@ -8,13 +8,15 @@ import Reports from './components/Reports';
 import SettingsSection from './components/SettingsSection';
 import BudgetsSection from './components/BudgetsSection';
 import RecurringExpensesSection from './components/RecurringExpensesSection';
-import { LayoutDashboard, Receipt, PiggyBank, Users, BarChart3, Wallet, Settings, Target, Repeat } from 'lucide-react';
+import TasksSection from './components/TasksSection';
+import { LayoutDashboard, Receipt, PiggyBank, Users, BarChart3, Wallet, Settings, Target, Repeat, ListChecks } from 'lucide-react';
 
-type Tab = 'dashboard' | 'transactions' | 'goals' | 'budgets' | 'recurring' | 'members' | 'reports' | 'settings';
-type TabColor = 'teal' | 'sky' | 'violet' | 'amber' | 'fuchsia' | 'rose' | 'cyan' | 'indigo';
+type Tab = 'dashboard' | 'transactions' | 'goals' | 'budgets' | 'recurring' | 'tasks' | 'members' | 'reports' | 'settings';
+type TabColor = 'teal' | 'sky' | 'violet' | 'amber' | 'fuchsia' | 'rose' | 'cyan' | 'indigo' | 'emerald';
 
 const TABS: { id: Tab; label: string; icon: typeof LayoutDashboard; color: TabColor }[] = [
   { id: 'dashboard', label: 'סקירה', icon: LayoutDashboard, color: 'teal' },
+  { id: 'tasks', label: 'משימות משפחתיות', icon: ListChecks, color: 'emerald' },
   { id: 'transactions', label: 'הכנסות והוצאות', icon: Receipt, color: 'sky' },
   { id: 'budgets', label: 'תקציבים', icon: Target, color: 'violet' },
   { id: 'recurring', label: 'הוצאות קבועות', icon: Repeat, color: 'indigo' },
@@ -33,6 +35,7 @@ const TAB_ACTIVE_CLASSES: Record<TabColor, string> = {
   rose: 'bg-rose-100 text-rose-700 dark:bg-rose-900/50 dark:text-rose-300',
   cyan: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/50 dark:text-cyan-300',
   indigo: 'bg-indigo-100 text-indigo-700 dark:bg-indigo-900/50 dark:text-indigo-300',
+  emerald: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300',
 };
 
 function AppShell() {
@@ -75,6 +78,7 @@ function AppShell() {
         {tab === 'goals' && <GoalsSection />}
         {tab === 'budgets' && <BudgetsSection />}
         {tab === 'recurring' && <RecurringExpensesSection />}
+        {tab === 'tasks' && <TasksSection />}
         {tab === 'reports' && <Reports />}
         {tab === 'members' && <MembersSection />}
         {tab === 'settings' && <SettingsSection />}

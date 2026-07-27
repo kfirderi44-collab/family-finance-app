@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useAppData } from '../store/AppDataContext';
 import { formatCurrency, monthKey } from '../utils/format';
-import { ArrowDownCircle, ArrowUpCircle, Wallet, PiggyBank, LayoutDashboard } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Wallet, PiggyBank, LayoutDashboard, ListChecks } from 'lucide-react';
 
-type Tab = 'dashboard' | 'transactions' | 'goals' | 'budgets' | 'members' | 'reports';
+type Tab = 'dashboard' | 'transactions' | 'goals' | 'budgets' | 'recurring' | 'tasks' | 'members' | 'reports';
 
 interface Props {
   onNavigate: (tab: Tab) => void;
@@ -68,6 +68,15 @@ export default function Dashboard({ onNavigate }: Props) {
       .sort((a, b) => b.spent / b.limit - a.spent / a.limit);
   }, [data.transactions, data.budgets]);
 
+  const pendingTasks = useMemo(() => {
+    const scopeOrder: Record<string, number> = { week: 0, month: 1, general: 2 };
+    return [...data.tasks]
+      .filter((t) => !t.done)
+      .sort((a, b) => scopeOrder[a.scope] - scopeOrder[b.scope]);
+  }, [data.tasks]);
+
+  const scopeLabel: Record<string, string> = { general: 'כללי', week: 'השבוע', month: 'החודש' };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
@@ -121,7 +130,36 @@ export default function Dashboard({ onNavigate }: Props) {
         </div>
       </div>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-semibold text-sm flex items-center gap-2">
+              <span className="p-1 rounded-md bg-emerald-100 dark:bg-emerald-900/40">
+                <ListChecks size={13} className="text-emerald-600 dark:text-emerald-400" />
+              </span>
+              משימות פתוחות
+            </h3>
+            <button
+              onClick={() => onNavigate('tasks')}
+              className="text-xs text-emerald-600 hover:underline"
+            >
+              לכל המשימות
+            </button>
+          </div>
+          {pendingTasks.length === 0 ? (
+            <p className="text-sm text-slate-400 text-center py-6">אין משימות פתוחות. כל הכבוד!</p>
+          ) : (
+            <ul className="space-y-2">
+              {pendingTasks.slice(0, 5).map((t) => (
+                <li key={t.id} className="flex items-center gap-2 text-sm">
+                  <span className="flex-1 truncate">{t.title}</span>
+                  <span className="text-xs text-slate-400 shrink-0">{scopeLabel[t.scope]}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold text-sm flex items-center gap-2">
