@@ -25,6 +25,7 @@ export interface RecurringExpense {
   memberId: string;
   dayOfMonth: number; // 1-28
   active: boolean;
+  totalAmount?: number; // for loans/mortgages: total amount to be repaid
 }
 
 export type TaskScope = 'general' | 'week' | 'month';
@@ -64,6 +65,7 @@ export interface AppData {
 export const DEFAULT_EXPENSE_CATEGORIES = [
   'מזון',
   'דיור',
+  'משכנתא והלוואות',
   'חשבונות',
   'תחבורה',
   'בריאות',

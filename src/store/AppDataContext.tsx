@@ -76,7 +76,6 @@ function generateDueRecurringTransactions(d: AppData): AppData {
       r.dayOfMonth <= day &&
       !d.transactions.some((t) => t.recurringId === r.id && t.date.startsWith(monthPrefix))
   );
-  if (due.length === 0) return d;
 
   const generated: Transaction[] = due.map((r) => ({
     id: uuid(),
@@ -89,7 +88,24 @@ function generateDueRecurringTransactions(d: AppData): AppData {
     recurringId: r.id,
   }));
 
-  return { ...d, transactions: [...d.transactions, ...generated] };
+  const transactions = generated.length > 0 ? [...d.transactions, ...generated] : d.transactions;
+
+  // Loans/mortgages stop generating new payments once fully repaid.
+  let changed = generated.length > 0;
+  const recurringExpenses = d.recurringExpenses.map((r) => {
+    if (!r.active || !r.totalAmount) return r;
+    const paid = transactions
+      .filter((t) => t.recurringId === r.id)
+      .reduce((sum, t) => sum + t.amount, 0);
+    if (paid >= r.totalAmount) {
+      changed = true;
+      return { ...r, active: false };
+    }
+    return r;
+  });
+
+  if (!changed) return d;
+  return { ...d, transactions, recurringExpenses };
 }
 
 function loadData(): AppData {
