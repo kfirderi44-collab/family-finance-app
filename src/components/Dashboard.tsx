@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { useAppData } from '../store/AppDataContext';
 import { formatCurrency, monthKey } from '../utils/format';
-import { ArrowDownCircle, ArrowUpCircle, Wallet, PiggyBank, LayoutDashboard, ListChecks } from 'lucide-react';
+import { ArrowDownCircle, ArrowUpCircle, Wallet, PiggyBank, LayoutDashboard, ListChecks, Plus } from 'lucide-react';
 
 type Tab = 'dashboard' | 'transactions' | 'goals' | 'budgets' | 'recurring' | 'tasks' | 'members' | 'reports';
 
@@ -79,14 +79,24 @@ export default function Dashboard({ onNavigate }: Props) {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-xl bg-teal-100 dark:bg-teal-900/40">
-          <LayoutDashboard size={20} className="text-teal-600 dark:text-teal-400" />
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-teal-100 dark:bg-teal-900/40">
+            <LayoutDashboard size={20} className="text-teal-600 dark:text-teal-400" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold mb-1">סקירה כללית</h2>
+            <p className="text-sm text-slate-500">מצב הכספים המשפחתי בזמן אמת.</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-xl font-bold mb-1">סקירה כללית</h2>
-          <p className="text-sm text-slate-500">מצב הכספים המשפחתי בזמן אמת.</p>
-        </div>
+        <button
+          onClick={() => onNavigate('transactions')}
+          className="flex items-center gap-1.5 rounded-full bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium px-4 py-2 shadow-sm shrink-0"
+        >
+          <Plus size={16} />
+          <ArrowDownCircle size={16} />
+          רישום הוצאה מהירה
+        </button>
       </div>
 
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
