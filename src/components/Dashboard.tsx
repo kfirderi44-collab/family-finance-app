@@ -69,13 +69,13 @@ export default function Dashboard({ onNavigate }: Props) {
   }, [data.transactions, data.budgets]);
 
   const pendingTasks = useMemo(() => {
-    const scopeOrder: Record<string, number> = { week: 0, month: 1, general: 2 };
+    const scopeOrder: Record<string, number> = { date: 0, week: 1, month: 2, general: 3 };
     return [...data.tasks]
       .filter((t) => !t.done)
       .sort((a, b) => scopeOrder[a.scope] - scopeOrder[b.scope]);
   }, [data.tasks]);
 
-  const scopeLabel: Record<string, string> = { general: 'כללי', week: 'השבוע', month: 'החודש' };
+  const scopeLabel: Record<string, string> = { general: 'כללי', week: 'השבוע', month: 'החודש', date: 'תאריך' };
 
   return (
     <div className="space-y-6">
@@ -163,7 +163,9 @@ export default function Dashboard({ onNavigate }: Props) {
               {pendingTasks.slice(0, 5).map((t) => (
                 <li key={t.id} className="flex items-center gap-2 text-sm">
                   <span className="flex-1 truncate">{t.title}</span>
-                  <span className="text-xs text-slate-400 shrink-0">{scopeLabel[t.scope]}</span>
+                  <span className="text-xs text-slate-400 shrink-0">
+                    {t.scope === 'date' && t.dueDate ? t.dueDate : scopeLabel[t.scope]}
+                  </span>
                 </li>
               ))}
             </ul>

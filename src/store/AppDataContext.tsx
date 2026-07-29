@@ -144,7 +144,7 @@ interface AppDataContextValue {
   addRecurringExpense: (r: Omit<RecurringExpense, 'id' | 'active'>) => void;
   updateRecurringExpense: (id: string, updates: Partial<Omit<RecurringExpense, 'id'>>) => void;
   removeRecurringExpense: (id: string) => void;
-  addTask: (title: string, scope: TaskScope, memberId?: string) => void;
+  addTask: (title: string, scope: TaskScope, memberId?: string, dueDate?: string) => void;
   toggleTask: (id: string) => void;
   removeTask: (id: string) => void;
   nextMemberColor: () => string;
@@ -405,12 +405,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
         recurringExpenses: d.recurringExpenses.filter((r) => r.id !== id),
       }));
     },
-    addTask: (title, scope, memberId) => {
+    addTask: (title, scope, memberId, dueDate) => {
       const trimmed = title.trim();
       if (!trimmed) return;
       setData((d) => ({
         ...d,
-        tasks: [...d.tasks, { id: uuid(), title: trimmed, scope, memberId, done: false }],
+        tasks: [...d.tasks, { id: uuid(), title: trimmed, scope, memberId, dueDate, done: false }],
       }));
     },
     toggleTask: (id) => {

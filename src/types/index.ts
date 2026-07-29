@@ -28,12 +28,13 @@ export interface RecurringExpense {
   totalAmount?: number; // for loans/mortgages: total amount to be repaid
 }
 
-export type TaskScope = 'general' | 'week' | 'month';
+export type TaskScope = 'general' | 'week' | 'month' | 'date';
 
 export interface FamilyTask {
   id: string;
   title: string;
   scope: TaskScope;
+  dueDate?: string; // ISO date (yyyy-mm-dd), used when scope === 'date'
   memberId?: string;
   done: boolean;
 }
