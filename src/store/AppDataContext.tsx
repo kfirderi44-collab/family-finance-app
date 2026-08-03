@@ -68,31 +68,63 @@ function generateDueRecurringTransactions(d: AppData): AppData {
   const month = today.getMonth();
   const day = today.getDate();
   const monthPrefix = `${year}-${String(month + 1).padStart(2, '0')}`;
+  const todayIso = `${monthPrefix}-${String(day).padStart(2, '0')}`;
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  const due = d.recurringExpenses.filter(
+  const dueMonthly = d.recurringExpenses.filter(
     (r) =>
       r.active &&
+      !r.oneTime &&
+      r.dayOfMonth != null &&
       r.dayOfMonth <= day &&
       !d.transactions.some((t) => t.recurringId === r.id && t.date.startsWith(monthPrefix))
   );
 
-  const generated: Transaction[] = due.map((r) => ({
-    id: uuid(),
-    type: 'expense',
-    amount: r.amount,
-    category: r.category,
-    date: `${monthPrefix}-${String(Math.min(r.dayOfMonth, daysInMonth)).padStart(2, '0')}`,
-    memberId: r.memberId,
-    note: r.name,
-    recurringId: r.id,
-  }));
+  const dueOneTime = d.recurringExpenses.filter(
+    (r) =>
+      r.active &&
+      r.oneTime &&
+      r.date != null &&
+      r.date <= todayIso &&
+      !d.transactions.some((t) => t.recurringId === r.id)
+  );
+
+  const generated: Transaction[] = [
+    ...dueMonthly.map((r) => ({
+      id: uuid(),
+      type: 'expense' as const,
+      amount: r.amount,
+      category: r.category,
+      date: `${monthPrefix}-${String(Math.min(r.dayOfMonth!, daysInMonth)).padStart(2, '0')}`,
+      memberId: r.memberId,
+      note: r.name,
+      recurringId: r.id,
+    })),
+    ...dueOneTime.map((r) => ({
+      id: uuid(),
+      type: 'expense' as const,
+      amount: r.amount,
+      category: r.category,
+      date: r.date!,
+      memberId: r.memberId,
+      note: r.name,
+      recurringId: r.id,
+    })),
+  ];
 
   const transactions = generated.length > 0 ? [...d.transactions, ...generated] : d.transactions;
 
-  // Loans/mortgages stop generating new payments once fully repaid.
   let changed = generated.length > 0;
   const recurringExpenses = d.recurringExpenses.map((r) => {
+    // One-time expenses fire once, then switch off for good.
+    if (r.oneTime) {
+      if (r.active && transactions.some((t) => t.recurringId === r.id)) {
+        changed = true;
+        return { ...r, active: false };
+      }
+      return r;
+    }
+    // Loans/mortgages stop generating new payments once fully repaid.
     if (!r.active || !r.totalAmount) return r;
     const paid = transactions
       .filter((t) => t.recurringId === r.id)

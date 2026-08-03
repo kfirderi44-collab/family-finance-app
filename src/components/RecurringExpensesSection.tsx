@@ -1,16 +1,25 @@
 import { useState } from 'react';
 import { useAppData } from '../store/AppDataContext';
-import { formatCurrency } from '../utils/format';
-import { Plus, Trash2, Repeat, Pause, Play, Landmark } from 'lucide-react';
+import { formatCurrency, todayIso } from '../utils/format';
+import { Plus, Trash2, Repeat, Pause, Play, Landmark, Calendar } from 'lucide-react';
+
+type Kind = 'regular' | 'loan' | 'oneTime';
+
+const KINDS: { id: Kind; label: string }[] = [
+  { id: 'regular', label: 'הוצאה קבועה' },
+  { id: 'loan', label: 'משכנתא / הלוואה' },
+  { id: 'oneTime', label: 'הוצאה חד פעמית גדולה' },
+];
 
 export default function RecurringExpensesSection() {
   const { data, addRecurringExpense, updateRecurringExpense, removeRecurringExpense } = useAppData();
+  const [kind, setKind] = useState<Kind>('regular');
   const [name, setName] = useState('');
   const [amount, setAmount] = useState('');
   const [category, setCategory] = useState<string>(data.expenseCategories[0] ?? '');
   const [dayOfMonth, setDayOfMonth] = useState('1');
+  const [date, setDate] = useState(todayIso());
   const [memberId, setMemberId] = useState(data.members[0]?.id ?? '');
-  const [isLoan, setIsLoan] = useState(false);
   const [totalAmount, setTotalAmount] = useState('');
 
   const memberById = Object.fromEntries(data.members.map((m) => [m.id, m]));
@@ -22,27 +31,39 @@ export default function RecurringExpensesSection() {
 
   const handleAdd = () => {
     const parsedAmount = Number(amount);
-    const parsedDay = Number(dayOfMonth);
-    const parsedTotal = isLoan ? Number(totalAmount) : undefined;
     if (!name.trim() || !parsedAmount || parsedAmount <= 0 || !memberId) return;
-    if (!parsedDay || parsedDay < 1 || parsedDay > 28) return;
-    if (isLoan && (!parsedTotal || parsedTotal <= 0)) return;
-    addRecurringExpense({
-      name: name.trim(),
-      amount: parsedAmount,
-      category,
-      memberId,
-      dayOfMonth: parsedDay,
-      totalAmount: parsedTotal,
-    });
+
+    if (kind === 'oneTime') {
+      if (!date) return;
+      addRecurringExpense({ name: name.trim(), amount: parsedAmount, category, memberId, date, oneTime: true });
+    } else {
+      const parsedDay = Number(dayOfMonth);
+      if (!parsedDay || parsedDay < 1 || parsedDay > 28) return;
+      const parsedTotal = kind === 'loan' ? Number(totalAmount) : undefined;
+      if (kind === 'loan' && (!parsedTotal || parsedTotal <= 0)) return;
+      addRecurringExpense({
+        name: name.trim(),
+        amount: parsedAmount,
+        category,
+        memberId,
+        dayOfMonth: parsedDay,
+        totalAmount: parsedTotal,
+      });
+    }
+
     setName('');
     setAmount('');
     setDayOfMonth('1');
-    setIsLoan(false);
+    setDate(todayIso());
     setTotalAmount('');
   };
 
-  const total = data.recurringExpenses.filter((r) => r.active).reduce((s, r) => s + r.amount, 0);
+  const total = data.recurringExpenses
+    .filter((r) => r.active && !r.oneTime)
+    .reduce((s, r) => s + r.amount, 0);
+
+  const namePlaceholder =
+    kind === 'loan' ? 'לדוגמה: משכנתא דירה' : kind === 'oneTime' ? 'לדוגמה: החלפת מזגן' : 'לדוגמה: ביטוח רכב';
 
   return (
     <div className="space-y-6">
@@ -53,21 +74,27 @@ export default function RecurringExpensesSection() {
         <div>
           <h2 className="text-xl font-bold mb-1">הוצאות קבועות</h2>
           <p className="text-sm text-slate-500">
-            ביטוחים, מנויים, משכנתא והלוואות — נרשמות אוטומטית כל חודש.
+            ביטוחים, מנויים, משכנתא, הלוואות והוצאות חד-פעמיות גדולות — נרשמות אוטומטית.
           </p>
         </div>
       </div>
 
       <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 space-y-3">
-        <label className="flex items-center gap-2 text-sm">
-          <input
-            type="checkbox"
-            checked={isLoan}
-            onChange={(e) => setIsLoan(e.target.checked)}
-            className="accent-indigo-600"
-          />
-          זוהי משכנתא / הלוואה (עם מעקב יתרה ופרעון)
-        </label>
+        <div className="flex flex-wrap gap-2">
+          {KINDS.map(({ id, label }) => (
+            <button
+              key={id}
+              onClick={() => setKind(id)}
+              className={`flex-1 min-w-[9rem] flex items-center justify-center gap-1.5 rounded-lg py-2 text-sm font-medium border ${
+                kind === id
+                  ? 'bg-indigo-50 border-indigo-300 text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300'
+                  : 'border-slate-300 dark:border-slate-600 text-slate-500'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
           <div className="col-span-2 sm:col-span-1">
@@ -75,12 +102,12 @@ export default function RecurringExpensesSection() {
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder={isLoan ? 'לדוגמה: משכנתא דירה' : 'לדוגמה: ביטוח רכב'}
+              placeholder={namePlaceholder}
               className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
           <div>
-            <label className="text-xs text-slate-500">סכום חודשי</label>
+            <label className="text-xs text-slate-500">{kind === 'oneTime' ? 'סכום' : 'סכום חודשי'}</label>
             <input
               type="number"
               min={0}
@@ -90,7 +117,7 @@ export default function RecurringExpensesSection() {
               className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
           </div>
-          {isLoan && (
+          {kind === 'loan' && (
             <div>
               <label className="text-xs text-slate-500">סכום ההלוואה הכולל</label>
               <input
@@ -117,17 +144,29 @@ export default function RecurringExpensesSection() {
               ))}
             </select>
           </div>
-          <div>
-            <label className="text-xs text-slate-500">יום בחודש לחיוב</label>
-            <input
-              type="number"
-              min={1}
-              max={28}
-              value={dayOfMonth}
-              onChange={(e) => setDayOfMonth(e.target.value)}
-              className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            />
-          </div>
+          {kind === 'oneTime' ? (
+            <div>
+              <label className="text-xs text-slate-500">תאריך</label>
+              <input
+                type="date"
+                value={date}
+                onChange={(e) => setDate(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          ) : (
+            <div>
+              <label className="text-xs text-slate-500">יום בחודש לחיוב</label>
+              <input
+                type="number"
+                min={1}
+                max={28}
+                value={dayOfMonth}
+                onChange={(e) => setDayOfMonth(e.target.value)}
+                className="w-full rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+          )}
           <div>
             <label className="text-xs text-slate-500">בן משפחה</label>
             <select
@@ -148,13 +187,13 @@ export default function RecurringExpensesSection() {
           className="w-full flex items-center justify-center gap-1.5 rounded-lg bg-indigo-600 py-2.5 text-sm font-medium text-white hover:bg-indigo-700"
         >
           <Plus size={16} />
-          {isLoan ? 'הוספת משכנתא / הלוואה' : 'הוספת הוצאה קבועה'}
+          {kind === 'loan' ? 'הוספת משכנתא / הלוואה' : kind === 'oneTime' ? 'הוספת הוצאה חד פעמית' : 'הוספת הוצאה קבועה'}
         </button>
       </div>
 
       {data.recurringExpenses.length > 0 && (
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 flex items-center justify-between">
-          <span className="text-sm text-slate-500">סה"כ חודשי (פעילות בלבד)</span>
+          <span className="text-sm text-slate-500">סה"כ חודשי (פעילות בלבד, לא כולל חד-פעמיות)</span>
           <span className="text-lg font-bold text-indigo-600">{formatCurrency(total)}</span>
         </div>
       )}
@@ -167,7 +206,8 @@ export default function RecurringExpensesSection() {
           const paid = r.totalAmount ? paidSoFar(r.id) : 0;
           const pct = r.totalAmount ? Math.min(100, Math.round((paid / r.totalAmount) * 100)) : 0;
           const finished = !!r.totalAmount && paid >= r.totalAmount;
-          const Icon = r.totalAmount ? Landmark : Repeat;
+          const oneTimeDone = !!r.oneTime && !r.active;
+          const Icon = r.oneTime ? Calendar : r.totalAmount ? Landmark : Repeat;
           return (
             <li
               key={r.id}
@@ -183,6 +223,7 @@ export default function RecurringExpensesSection() {
                     {finished && (
                       <span className="text-xs text-emerald-600 font-normal">נפרעה במלואה</span>
                     )}
+                    {oneTimeDone && <span className="text-xs text-emerald-600 font-normal">נרשמה</span>}
                     <span
                       className="w-2 h-2 rounded-full shrink-0"
                       style={{ backgroundColor: memberById[r.memberId]?.color }}
@@ -190,7 +231,8 @@ export default function RecurringExpensesSection() {
                     <span className="text-slate-500 font-normal">{memberById[r.memberId]?.name}</span>
                   </div>
                   <div className="text-xs text-slate-400 truncate">
-                    {r.category} · ה-{r.dayOfMonth} בכל חודש
+                    {r.category} ·{' '}
+                    {r.oneTime ? `תאריך: ${r.date}` : `ה-${r.dayOfMonth} בכל חודש`}
                   </div>
                 </div>
                 <span className="text-sm font-semibold text-rose-500">{formatCurrency(r.amount)}</span>

@@ -23,9 +23,11 @@ export interface RecurringExpense {
   amount: number;
   category: string;
   memberId: string;
-  dayOfMonth: number; // 1-28
+  dayOfMonth?: number; // 1-28, used for monthly recurrence (not set for one-time expenses)
   active: boolean;
   totalAmount?: number; // for loans/mortgages: total amount to be repaid
+  oneTime?: boolean; // true = a single large expense scheduled for `date`, not a monthly recurrence
+  date?: string; // ISO date (yyyy-mm-dd), used when oneTime is true
 }
 
 export type TaskScope = 'general' | 'week' | 'month' | 'date';
