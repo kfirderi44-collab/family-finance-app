@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { v4 as uuid } from 'uuid';
-import { DEFAULT_EXPENSE_CATEGORIES, type AppData, type Contribution, type Goal, type Member, type RecurringExpense, type TaskScope, type Transaction } from '../types';
+import { DEFAULT_EXPENSE_CATEGORIES, type AppData, type Contribution, type FamilyTask, type Goal, type Member, type RecurringExpense, type TaskScope, type Transaction } from '../types';
 import {
   loadSyncConfig,
   saveSyncConfig,
@@ -145,6 +145,7 @@ interface AppDataContextValue {
   updateRecurringExpense: (id: string, updates: Partial<Omit<RecurringExpense, 'id'>>) => void;
   removeRecurringExpense: (id: string) => void;
   addTask: (title: string, scope: TaskScope, memberId?: string, dueDate?: string) => void;
+  updateTask: (id: string, updates: Partial<Omit<FamilyTask, 'id'>>) => void;
   toggleTask: (id: string) => void;
   removeTask: (id: string) => void;
   nextMemberColor: () => string;
@@ -411,6 +412,12 @@ export function AppDataProvider({ children }: { children: ReactNode }) {
       setData((d) => ({
         ...d,
         tasks: [...d.tasks, { id: uuid(), title: trimmed, scope, memberId, dueDate, done: false }],
+      }));
+    },
+    updateTask: (id, updates) => {
+      setData((d) => ({
+        ...d,
+        tasks: d.tasks.map((t) => (t.id === id ? { ...t, ...updates } : t)),
       }));
     },
     toggleTask: (id) => {
